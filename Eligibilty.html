@@ -1,0 +1,243 @@
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const token = sessionStorage.getItem("token");
+    if (!token) {
+      // No token → redirect to login
+      window.location.href = "Auth.html";
+    }
+  });
+</script>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Eligibility Requirements — Federal Student Aid</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    .req-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 40px; }
+    .req-card {
+      background: var(--white); border-radius: var(--radius);
+      padding: 28px; box-shadow: var(--shadow-sm);
+      border-left: 4px solid var(--navy);
+    }
+    .req-card.warn  { border-left-color: var(--gold); }
+    .req-card.check { border-left-color: var(--green); }
+    .req-card h3 { font-size: 1.05rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+    .req-card ul { list-style: none; }
+    .req-card ul li {
+      padding: 7px 0; font-size: .92rem; color: var(--gray-600);
+      border-bottom: 1px solid var(--gray-100);
+      display: flex; gap: 10px; align-items: flex-start;
+    }
+    .req-card ul li:last-child { border-bottom: none; }
+    .req-card ul li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+    .req-card.warn ul li::before { content: '⚠'; color: var(--gold-dark); }
+
+    .checker-wrap {
+      background: var(--white); border-radius: var(--radius);
+      padding: 36px; box-shadow: var(--shadow-md);
+      max-width: 680px; margin: 48px auto 0;
+    }
+    .checker-wrap h2 { text-align: center; margin-bottom: 8px; }
+    .checker-wrap p  { text-align: center; color: var(--gray-600); margin-bottom: 28px; }
+    .checker-q { margin-bottom: 18px; }
+    .checker-q label { font-weight: 700; font-size: .95rem; margin-bottom: 10px; display: block; }
+    .radio-group { display: flex; gap: 16px; flex-wrap: wrap; }
+    .radio-option {
+      flex: 1; min-width: 120px;
+      border: 2px solid var(--gray-100); border-radius: 8px; padding: 14px 16px;
+      display: flex; align-items: center; gap: 10px; cursor: pointer;
+      font-size: .92rem; font-weight: 600; color: var(--gray-600);
+      transition: all var(--transition);
+    }
+    .radio-option:has(input:checked) {
+      border-color: var(--navy); background: rgba(0,40,104,.05); color: var(--navy);
+    }
+    .radio-option input { accent-color: var(--navy); }
+    #checker-result { display: none; margin-top: 24px; border-radius: var(--radius); padding: 20px; }
+    #checker-result.show { display: block; }
+    #checker-result.eligible   { background: #e6f4ea; border: 1.5px solid var(--green); }
+    #checker-result.ineligible { background: #fce8e6; border: 1.5px solid var(--red); }
+    #checker-result h3 { margin-bottom: 8px; }
+    .result-eligible   h3 { color: var(--green); }
+    .result-ineligible h3 { color: var(--red); }
+
+    @media(max-width:700px){ .req-grid{ grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-seal">🎓</div>
+      <div class="logo-text">Federal Student Aid<span>U.S. Department of Education</span></div>
+    </a>
+    <nav class="nav">
+      <a href="index.html">Home</a>
+      <a href="eligibility.html" class="active">Eligibility</a>
+      <a href="faq.html">Help &amp; FAQ</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="application.html" class="nav-cta">Apply Now</a>
+    </nav>
+    <button class="hamburger" id="hamburger" aria-label="Open menu"><span></span><span></span><span></span></button>
+  </div>
+  <nav class="mobile-menu" id="mobileMenu">
+    <a href="index.html">Home</a>
+    <a href="eligibility.html">Eligibility</a>
+    <a href="faq.html">Help &amp; FAQ</a>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="application.html">Apply Now →</a>
+  </nav>
+</header>
+
+<div class="page-hero">
+  <div class="container">
+    <nav class="breadcrumb"><a href="index.html">Home</a><span>›</span>Eligibility Requirements</nav>
+    <span class="page-hero-label">Before You Apply</span>
+    <h1>Eligibility Requirements</h1>
+    <p>Review the basic requirements before starting your application. Most students at U.S. colleges and universities qualify.</p>
+  </div>
+</div>
+
+<main>
+  <section class="section">
+    <div class="container">
+      <div class="alert alert-info"><span class="alert-icon">ℹ️</span><div>Meeting these requirements does not guarantee aid — it means you are <strong>eligible to apply</strong>. Aid amounts depend on financial need and program availability.</div></div>
+
+      <div class="req-grid">
+        <div class="req-card check">
+          <h3>📋 Basic Eligibility</h3>
+          <ul>
+            <li>Be a U.S. citizen or eligible non-citizen</li>
+            <li>Have a valid Social Security Number (SSN)</li>
+            <li>Have a high school diploma or GED</li>
+            <li>Be enrolled or accepted into an eligible degree program</li>
+            <li>Maintain satisfactory academic progress</li>
+            <li>Not be in default on a federal student loan</li>
+          </ul>
+        </div>
+        <div class="req-card">
+          <h3>🏫 School Requirements</h3>
+          <ul>
+            <li>Enrolled at least half-time in most programs</li>
+            <li>School must be a Title IV-participating institution</li>
+            <li>Working toward a degree or certificate</li>
+            <li>Undergraduate or graduate student status</li>
+            <li>Not have exceeded loan limits for your program</li>
+          </ul>
+        </div>
+        <div class="req-card">
+          <h3>📄 Financial Requirements</h3>
+          <ul>
+            <li>Demonstrate financial need (for need-based aid)</li>
+            <li>Provide tax return information (yours and/or parents')</li>
+            <li>Report all household income and assets</li>
+            <li>No requirement to have a minimum income</li>
+            <li>Independent students assessed separately</li>
+          </ul>
+        </div>
+        <div class="req-card warn">
+          <h3>⚠️ Disqualifying Factors</h3>
+          <ul>
+            <li>Currently incarcerated in a federal/state facility</li>
+            <li>Defaulted on a prior federal student loan</li>
+            <li>Owe a refund on a previous federal grant</li>
+            <li>Convicted of a drug offense while receiving aid</li>
+            <li>Not enrolled in an eligible program</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUICK CHECKER -->
+  <section class="section--sm" style="background:var(--off-white);">
+    <div class="container">
+      <div class="checker-wrap">
+        <h2>Quick Eligibility Checker</h2>
+        <p>Answer 3 quick questions to see if you may qualify.</p>
+
+        <div class="checker-q">
+          <label>1. Are you a U.S. citizen or eligible non-citizen?</label>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="q1" value="yes"> ✅ Yes</label>
+            <label class="radio-option"><input type="radio" name="q1" value="no">  ❌ No</label>
+          </div>
+        </div>
+        <div class="checker-q">
+          <label>2. Do you have a valid Social Security Number?</label>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="q2" value="yes"> ✅ Yes</label>
+            <label class="radio-option"><input type="radio" name="q2" value="no">  ❌ No</label>
+          </div>
+        </div>
+        <div class="checker-q">
+          <label>3. Are you enrolled (or planning to enroll) at an accredited college or university?</label>
+          <div class="radio-group">
+            <label class="radio-option"><input type="radio" name="q3" value="yes"> ✅ Yes</label>
+            <label class="radio-option"><input type="radio" name="q3" value="no">  ❌ No</label>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" style="width:100%; justify-content:center; margin-top:8px;" onclick="checkEligibility()">Check My Eligibility →</button>
+
+        <div id="checker-result">
+          <h3 id="result-title"></h3>
+          <p id="result-msg"></p>
+          <div id="result-cta" style="margin-top:16px;"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="index.html" class="logo" style="color:var(--white);">
+          <div class="logo-seal">🎓</div>
+          <div class="logo-text">Federal Student Aid<span>U.S. Department of Education</span></div>
+        </a>
+        <p style="margin-top:14px;">Helping students access the financial resources they need to pursue higher education.</p>
+      </div>
+      <div class="footer-col"><h4>Applications</h4><a href="application.html">Start Application</a><a href="review.html">Review Submission</a><a href="confirmation.html">Check Status</a></div>
+      <div class="footer-col"><h4>Information</h4><a href="eligibility.html">Eligibility</a><a href="faq.html">FAQ &amp; Help</a><a href="privacy.html">Privacy Policy</a></div>
+      <div class="footer-col"><h4>Contact</h4><a href="tel:18004334636">1-800-433-4636</a><a href="/cdn-cgi/l/email-protection#3a525f564a7a494e4f5e5f544e5b535e145d554c"><span class="__cf_email__" data-cfemail="731b161f033300070617161d07121a175d141c05">[email&#160;protected]</span></a></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2024 U.S. Department of Education. All rights reserved.</span>
+      <span class="secure-badge">🔒 Secure &amp; Encrypted</span>
+    </div>
+  </div>
+</footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  document.getElementById('hamburger').addEventListener('click', function(){
+    document.getElementById('mobileMenu').classList.toggle('open');
+  });
+
+  function checkEligibility() {
+    const q1 = document.querySelector('input[name="q1"]:checked');
+    const q2 = document.querySelector('input[name="q2"]:checked');
+    const q3 = document.querySelector('input[name="q3"]:checked');
+    if (!q1 || !q2 || !q3) { alert('Please answer all 3 questions.'); return; }
+    const result = document.getElementById('checker-result');
+    const title  = document.getElementById('result-title');
+    const msg    = document.getElementById('result-msg');
+    const cta    = document.getElementById('result-cta');
+    result.classList.remove('eligible','ineligible');
+    result.classList.add('show');
+    if (q1.value==='yes' && q2.value==='yes' && q3.value==='yes') {
+      result.classList.add('eligible');
+      title.textContent = '✅ You Appear to Meet Basic Requirements!';
+      msg.textContent   = 'Based on your answers, you likely qualify to apply for federal student aid. Completing the full application will determine your exact eligibility and aid amount.';
+      cta.innerHTML     = '<a href="application.html" class="btn btn-primary">Start My Application →</a>';
+    } else {
+      result.classList.add('ineligible');
+      title.textContent = '⚠️ You May Not Qualify for Federal Aid';
+      msg.textContent   = 'Based on your answers, you may face challenges qualifying for standard federal aid. Please call 1-800-43

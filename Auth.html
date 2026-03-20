@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign In — Federal Student Aid Portal</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>"/>
+  <style>
+    /* ═══════════════════════════════════════
+       PAGE SHELL
+    ═══════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      background: #f0f3f9;
+      font-family: 'Source Sans 3', sans-serif;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ═══════════════════════════════════════
+       TWO-COLUMN LAYOUT
+    ═══════════════════════════════════════ */
+    .auth-page {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 520px;
+      min-height: calc(100vh - 68px);
+    }
+
+    /* ── LEFT PANEL ── */
+    .auth-left {
+      background: linear-gradient(160deg, #0d1b3e 0%, #1a3070 60%, #0d1b3e 100%);
+      padding: 64px 56px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative background circles */
+    .auth-left::before {
+      content: '';
+      position: absolute;
+      width: 480px; height: 480px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(200,168,0,.12);
+      top: -120px; left: -80px;
+      pointer-events: none;
+    }
+    .auth-left::after {
+      content: '';
+      position: absolute;
+      width: 320px; height: 320px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(200,168,0,.08);
+      bottom: -80px; right: -60px;
+      pointer-events: none;
+    }
+
+    .auth-left-content { position: relative; z-index: 1; }
+
+    .auth-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 56px;
+      text-decoration: none;
+    }
+    .auth-brand-seal {
+      width: 48px; height: 48px;
+      background: #c8a800;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+      box-shadow: 0 0 0 4px rgba(200,168,0,.2);
+    }
+    .auth-brand-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      color: #fff;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+    .auth-brand-text span {
+      display: block;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: .65rem;
+      font-weight: 400;
+      color: rgba(255,255,255,.5);
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      margin-top: 1px;
+    }
+
+    .auth-left h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.9rem, 2.8vw, 2.6rem);
+      color: #fff;
+      line-height: 1.2;
+      margin-bottom: 20px;
+    }
+    .auth-left h1 em {
+      font-style: normal;
+      color: #c8a800;
+    }
+
+    .auth-left-desc {
+      font-size: .95rem;
+      color: rgba(255,255,255,.65);
+      line-height: 1.75;
+      max-width: 400px;
+      margin-bottom: 44px;
+    }
+
+    /* Feature list */
+    .auth-features { list-style: none; }
+    .auth-features li {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .af-icon {
+      width: 34px; height: 34px;
+      background: rgba(200,168,0,.15);
+      border: 1px solid rgba(200,168,0,.3);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .95rem;
+      flex-shrink: 0;
+    }
+    .af-text h4 {
+      font-size: .88rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 2px;
+      font-family: 'Source Sans 3', sans-serif;
+    }
+    .af-text p {
+      font-size: .78rem;
+      color: rgba(255,255,255,.5);
+      line-height: 1.5;
+    }
+
+    /* Bottom security note */
+    .auth-left-footer {
+      position: relative; z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .72rem;
+      color: rgba(255,255,255,.35);
+      letter-spacing: .04em;
+    }
+    .auth-left-footer::before {
+      content: '🔒';
+      font-size: .85rem;
+    }
+
+    /* ── RIGHT PANEL ── */
+    .auth-right {
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 52px;
+      position: relative;
+    }
+
+    .auth-form-wrap {
+      width: 100%;
+      max-width: 400px;
+    }
+
+    /* ── PANEL SWITCHER (Login / Register / Forgot) ── */
+    .auth-panel { display: none; animation: panelIn .3s ease; }
+    .auth-panel.active { display: block; }
+    @keyframes panelIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Panel header */
+    .panel-head { margin-bottom: 28px; }
+    .panel-head .panel-tag {
+      display: inline-block;
+      font-size: .65rem;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: #c8a800;
+      background: rgba(200,168,0,.1);
+      padding: 3px 10px;
+      border-radius: 3px;
+      margin-bottom: 10px;
+    }
+    .panel-head h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.7rem;
+      color: #0d1b3e;
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+    .panel-head p {
+      font-size: .85rem;
+      color: #8a94a6;
+      line-height: 1.6;
+    }
+
+    /* ── FORM FIELDS ── */
+    .f-group { margin-bottom: 18px; }
+    .f-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .f-label {
+      display: block;
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #5a6478;
+      margin-bottom: 7px;
+    }
+    .f-req { color: #b00020; }
+
+    .f-input {
+      width: 100%;
+      height: 44px;
+      padding: 0 14px;
+      border: 1.5px solid #d0d6e4;
+      border-radius: 7px;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: .92rem;
+      color: #1a2133;
+      background: #fff;
+      transition: border-color .18s, box-shadow .18s;
+      outline: none;
+    }
+    .f-input:focus {
+      border-color: #0d1b3e;
+      box-shadow: 0 0 0 3px rgba(13,27,62,.09);
+    }
+    .f-input.error {
+      border-color: #b00020;
+      box-shadow: 0 0 0 3px rgba(176,0,32,.08);
+    }
+    .f-input::placeholder { color: #c0c8d8; }
+
+    /* Password wrapper with show/hide */
+    .f-pw-wrap { position: relative; }
+    .f-pw-wrap .f-input { padding-right: 52px; }
+    .f-pw-eye {
+      position: absolute;
+      right: 0; top: 0; bottom: 0; width: 44px;
+      display: flex; align-items: center; justify-content: center;
+      background: none; border: none; cursor: pointer;
+      color: #8a94a6; font-size: .75rem; font-weight: 700;
+      font-family: 'Source Sans 3', sans-serif;
+      border-left: 1.5px solid #d0d6e4;
+      border-radius: 0 7px 7px 0;
+      transition: background .15s, color .15s;
+      letter-spacing: .04em;
+    }
+    .f-pw-eye:hover { background: #f4f6fa; color: #0d1b3e; }
+
+    /* Strength meter */
+    .f-strength {
+      margin-top: 7px;
+      display: none;
+    }
+    .f-strength.visible { display: block; }
+    .f-strength-track {
+      height: 3px;
+      background: #eef0f5;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 4px;
+    }
+    .f-strength-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width .3s, background .3s;
+      width: 0%;
+    }
+    .f-strength-label {
+      font-size: .68rem;
+      font-weight: 700;
+      color: #9aa0b0;
+    }
+
+    /* Error + hint text */
+    .f-err {
+      display: none;
+      font-size: .72rem;
+      color: #b00020;
+      font-weight: 700;
+      margin-top: 5px;
+    }
+    .f-err.show { display: flex; align-items: center; gap: 4px; }
+    .f-err::before { content: '⚠'; font-size: .68rem; }
+    .f-hint { font-size: .72rem; color: #9aa0b0; margin-top: 5px; line-height: 1.5; }
+
+    /* Checkbox row */
+    .f-check {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: .83rem;
+      color: #5a6478;
+      cursor: pointer;
+      line-height: 1.55;
+    }
+    .f-check input[type="checkbox"] {
+      width: 16px; height: 16px;
+      accent-color: #0d1b3e;
+      flex-shrink: 0;
+      margin-top: 2px;
+      cursor: pointer;
+    }
+    .f-check a { color: #0d1b3e; font-weight: 700; text-decoration: underline; }
+
+    /* Forgot password link */
+    .f-forgot-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: -10px;
+      margin-bottom: 18px;
+    }
+    .f-forgot-link {
+      font-size: .78rem;
+      color: #0d1b3e;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: underline;
+      background: none;
+      border: none;
+      padding: 0;
+      font-family: 'Source Sans 3', sans-serif;
+    }
+    .f-forgot-link:hover { color: #c8a800; }
+
+    /* ── SUBMIT BUTTON ── */
+    .btn-auth {
+      width: 100%;
+      height: 48px;
+      background: #0d1b3e;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: .88rem;
+      font-weight: 800;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background .18s, transform .12s;
+      margin-top: 8px;
+    }
+    .btn-auth:hover   { background: #001540; }
+    .btn-auth:active  { transform: scale(.98); }
+    .btn-auth:disabled { opacity: .6; cursor: not-allowed; }
+    .btn-auth.loading::after {
+      content: '';
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      margin-left: 4px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── DIVIDER ── */
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 22px 0;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #c0c8d8;
+    }
+    .auth-divider::before,
+    .auth-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #eef0f5;
+    }
+
+    /* ── SWITCH LINK ── */
+    .auth-switch {
+      text-align: center;
+      font-size: .83rem;
+      color: #8a94a6;
+      margin-top: 20px;
+    }
+    .auth-switch button {
+      background: none;
+      border: none;
+      color: #0d1b3e;
+      font-weight: 800;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: .83rem;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+    }
+    .auth-switch button:hover { color: #c8a800; }
+
+    /* ── ALERT BOX ── */
+    .auth-alert {
+      display: none;
+      padding: 12px 16px;
+      border-radius: 7px;
+      font-size: .83rem;
+      font-weight: 600;
+      margin-bottom: 18px;
+      line-height: 1.5;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .auth-alert.show { display: flex; }
+    .auth-alert.error   { background: #fce8e6; border-left: 4px solid #b00020; color: #b00020; }
+    .auth-alert.success { background: #e6f4ea; border-left: 4px solid #1a7a4a; color: #145e38; }
+    .auth-alert.info    { background: #e8f0fe; border-left: 4px solid #1a73e8; color: #0d47a1; }
+
+    /* ── BACK LINK ── */
+    .panel-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: none;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: .78rem;
+      font-weight: 700;
+      color: #8a94a6;
+      cursor: pointer;
+      padding: 0;
+      margin-bottom: 20px;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .panel-back:hover { color: #0d1b3e; }
+    .panel-back::before { content: '←'; font-size: .85rem; }
+
+    /* ── OTP / CODE BOXES ── */
+    .otp-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    .otp-box {
+      width: 52px; height: 56px;
+      border: 1.5px solid #d0d6e4;
+      border-radius: 8px;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #0d1b3e;
+      font-family: 'Playfair Display', serif;
+      outline: none;
+      transition: border-color .18s, box-shadow .18s;
+    }
+    .otp-box:focus {
+      border-color: #0d1b3e;
+      box-shadow: 0 0 0 3px rgba(13,27,62,.09);
+    }
+
+    /* ── SUCCESS STATE ── */
+    .success-state {
+      display: none;
+      text-align: center;
+      padding: 20px 0;
+    }
+    .success-state.show { display: block; }
+    .success-icon-wrap {
+      width: 72px; height: 72px;
+      background: #1a7a4a;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      margin: 0 auto 20px;
+      box-shadow: 0 0 0 10px rgba(26,122,74,.12);
+      animation: successPop .4s cubic-bezier(.175,.885,.32,1.275);
+    }
+    @keyframes successPop {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+    .success-state h3 { font-size: 1.2rem; color: #0d1b3e; margin-bottom: 8px; }
+    .success-state p  { font-size: .85rem; color: #8a94a6; line-height: 1.65; }
+
+    /* ── FOOTER ── */
+    .auth-footer {
+      background: #f9fafc;
+      border-top: 1px solid #eef0f5;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: .75rem;
+      color: #9aa0b0;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .auth-footer a { color: #5a6478; font-weight: 600; text-decoration: none; }
+    .auth-footer a:hover { color: #0d1b3e; }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width: 860px) {
+      .auth-page { grid-template-columns: 1fr; }
+      .auth-left {
+        display: none; /* hide on mobile — too small */
+      }
+      .auth-right { padding: 40px 28px; min-height: calc(100vh - 68px); }
+    }
+    @media(max-width: 480px) {
+      .f-row-2 { grid-template-columns: 1fr; }
+      .otp-box { width: 44px; height: 50px; font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-seal">🎓</div>
+      <div class="logo-text">Federal Student Aid<span>U.S. Department of Education</span></div>
+    </a>
+    <nav class="nav">
+      <a href="index.html">Home</a>
+      <a href="eligibility.html">Eligibility</a>
+      <a href="faq.html">Help &amp; FAQ</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="application.html" class="nav-cta">Apply Now</a>
+    </nav>
+    <button class="hamburger" id="hamburger" aria-label="Open menu"><span></span><span></span><span></span></button>
+  </div>
+  <nav class="mobile-menu" id="mobileMenu">
+    <a href="index.html">Home</a>
+    <a href="eligibility.html">Eligibility</a>
+    <a href="faq.html">FAQ</a>
+    <a href="privacy.html">Privacy</a>
+    <a href="application.html">Apply Now →</a>
+  </nav>
+</header>
+
+<!-- ══════════════════════════════════════
+     MAIN AUTH LAYOUT
+══════════════════════════════════════ -->
+<div class="auth-page">
+
+  <!-- ── LEFT PANEL ── -->
+  <div class="auth-left">
+    <div class="auth-left-content">
+      <a href="index.html" class="auth-brand">
+        <div class="auth-brand-seal">🎓</div>
+        <div class="auth-brand-text">
+          Federal Student Aid
+          <span>U.S. Department of Education</span>
+        </div>
+      </a>
+
+      <h1>Your <em>education</em><br>funding starts here.</h1>
+      <p class="auth-left-desc">
+        Sign in to access your application, check your status, and manage your federal student aid — all in one secure place.
+      </p>
+
+      <ul class="auth-features">
+        <li>
+          <div class="af-icon">📋</div>
+          <div class="af-text">
+            <h4>Track Your Application</h4>
+            <p>Check real-time status updates and receive notifications at every stage.</p>
+          </div>
+        </li>
+        <li>
+          <div class="af-icon">💰</div>
+          <div class="af-text">
+            <h4>View Your Aid Package</h4>
+            <p>See grants, loans, and work-study eligibility once your SAR is processed.</p>
+          </div>
+        </li>
+        <li>
+          <div class="af-icon">🔒</div>
+          <div class="af-text">
+            <h4>Secure &amp; Encrypted</h4>
+            <p>256-bit SSL encryption protects your personal data and SSN at all times.</p>
+          </div>
+        </li>
+        <li>
+          <div class="af-icon">📧</div>
+          <div class="af-text">
+            <h4>Instant Email Confirmations</h4>
+            <p>Receive confirmations and updates directly to your registered email address.</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <div class="auth-left-footer">
+      Protected by federal law. FERPA &amp; Privacy Act compliant. No data sold.
+    </div>
+  </div>
+
+  <!-- ── RIGHT PANEL ── -->
+  <div class="auth-right">
+    <div class="auth-form-wrap">
+
+      <!-- ════════════════════════
+           PANEL 1: LOGIN
+      ════════════════════════ -->
+      <div class="auth-panel active" id="panel-login">
+
+        <div class="panel-head">
+          <span class="panel-tag">Secure Portal</span>
+          <h2>Welcome Back</h2>
+          <p>Sign in to your Federal Student Aid account.</p>
+        </div>
+
+        <div class="auth-alert" id="login-alert"></div>
+
+        <div class="f-group">
+          <label class="f-label" for="login-email">Email Address <span class="f-req">*</span></label>
+          <input type="email" id="login-email" class="f-input" placeholder="you@example.com" autocomplete="email"/>
+          <span class="f-err" id="login-email-err">Please enter a valid email address</span>
+        </div>
+
+        <div class="f-group">
+          <label class="f-label" for="login-password">Password <span class="f-req">*</span></label>
+          <div class="f-pw-wrap">
+            <input type="password" id="login-password" class="f-input" placeholder="Enter your password" autocomplete="current-password"/>
+            <button type="button" class="f-pw-eye" data-target="login-password">Show</button>
+          </div>
+          <span class="f-err" id="login-password-err">Password is required</span>
+        </div>
+
+        <div class="f-forgot-row">
+          <button class="f-forgot-link" onclick="showPanel('panel-forgot')">Forgot your password?</button>
+        </div>
+
+        <div class="f-group">
+          <label class="f-check">
+            <input type="checkbox" id="login-remember"/>
+            Keep me signed in for 30 days
+          </label>
+        </div>
+
+        <button class="btn-auth" id="login-btn" onclick="handleLogin()">
+          Sign In to My Account
+        </button>
+
+        <div class="auth-divider">or</div>
+
+        <div class="auth-switch">
+          Don't have an account?
+          <button onclick="showPanel('panel-register')">Create one now →</button>
+        </div>
+
+      </div><!-- /panel-login -->
+
+
+      <!-- ════════════════════════
+           PANEL 2: CREATE ACCOUNT
+      ════════════════════════ -->
+      <div class="auth-panel" id="panel-register">
+
+        <button class="panel-back" onclick="showPanel('panel-login')">Back to Sign In</button>
+
+        <div class="panel-head">
+          <span class="panel-tag">New Account</span>
+          <h2>Create Your Account</h2>
+          <p>Register to apply for federal student aid and track your application.</p>
+        </div>
+
+        <div class="auth-alert" id="register-alert"></div>
+
+        <div class="f-row-2">
+          <div class="f-group">
+            <label class="f-label" for="reg-first">First Name <span class="f-req">*</span></label>
+            <input type="text" id="reg-first" class="f-input" placeholder="Jonathan" autocomplete="given-name"/>
+            <span class="f-err" id="reg-first-err">First name is required</span>
+          </div>
+          <div class="f-group">
+            <label class="f-label" for="reg-last">Last Name <span class="f-req">*</span></label>
+            <input type="text" id="reg-last" class="f-input" placeholder="Williams" autocomplete="family-name"/>
+            <span class="f-err" id="reg-last-err">Last name is required</span>
+          </div>
+        </div>
+
+        <div class="f-group">
+          <label class="f-label" for="reg-email">Email Address <span class="f-req">*</span></label>
+          <input type="email" id="reg-email" class="f-input" placeholder="you@example.com" autocomplete="email"/>
+          <span class="f-hint">You'll use this to sign in and receive updates</span>
+          <span class="f-err" id="reg-email-err">Please enter a valid email address</span>
+        </div>
+
+        <div class="f-group">
+          <label class="f-label" for="reg-password">Password <span class="f-req">*</span></label>
+          <div class="f-pw-wrap">
+            <input type="password" id="reg-password" class="f-input" placeholder="Create a strong password" autocomplete="new-password" oninput="checkStrength(this)"/>
+            <button type="button" class="f-pw-eye" data-target="reg-password">Show</button>
+          </div>
+          <div class="f-strength" id="reg-strength">
+            <div class="f-strength-track">
+              <div class="f-strength-fill" id="reg-strength-fill"></div>
+            </div>
+            <span class="f-strength-label" id="reg-strength-label">Strength: —</span>
+          </div>
+          <span class="f-hint">At least 8 characters with a number and a symbol</span>
+          <span class="f-err" id="reg-password-err">Password must be at least 8 characters</span>
+        </div>
+
+        <div class="f-group">
+          <label class="f-label" for="reg-confirm">Confirm Password <span class="f-req">*</span></label>
+          <div class="f-pw-wrap">
+            <input type="password" id="reg-confirm" class="f-input" placeholder="Repeat your password" autocomplete="new-password"/>
+            <button type="button" class="f-pw-eye" data-target="reg-confirm">Show</button>
+          </div>
+          <span class="f-err" id="reg-confirm-err">Passwords do not match</span>
+        </div>
+
+        <div class="f-group">
+          <label class="f-check">
+            <input type="checkbox" id="reg-terms"/>
+            <span>I agree to the <a href="privacy.html" target="_blank">Privacy Policy</a> and <a href="privacy.html" target="_blank">Terms of Use</a>. I consent to my data being processed for federal student aid purposes.</span>
+          </label>
+          <span class="f-err" id="reg-terms-err" style="margin-top:6px;">You must agree to continue</span>
+        </div>
+
+        <button class="btn-auth" id="register-btn" onclick="handleRegister()">
+          Create My Account
+        </button>
+
+        <div class="auth-switch">
+          Already have an account?
+          <button onclick="showPanel('panel-login')">Sign in →</button>
+        </div>
+
+        <!-- Success state after registration -->
+        <div class="success-state" id="register-success">
+          <div class="success-icon-wrap">✓</div>
+          <h3>Account Created!</h3>
+          <p>Welcome to Federal Student Aid. A verification email has been sent to <strong id="reg-success-email"></strong>. Please verify your email before signing in.</p>
+          <button class="btn-auth" style="margin-top:20px;" onclick="showPanel('panel-login')">Go to Sign In →</button>
+        </div>
+
+      </div><!-- /panel-register -->
+
+
+      <!-- ════════════════════════
+           PANEL 3: FORGOT PASSWORD
+      ════════════════════════ -->
+      <div class="auth-panel" id="panel-forgot">
+
+        <button class="panel-back" onclick="showPanel('panel-login')">Back to Sign In</button>
+
+        <!-- Step A: Enter email -->
+        <div id="forgot-step-email">
+          <div class="panel-head">
+            <span class="panel-tag">Password Reset</span>
+            <h2>Forgot Your Password?</h2>
+            <p>No problem. Enter your registered email address and we'll send you a reset code.</p>
+          </div>
+
+          <div class="auth-alert" id="forgot-alert"></div>
+
+          <div class="f-group">
+            <label class="f-label" for="forgot-email">Registered Email Address <span class="f-req">*</span></label>
+            <input type="email" id="forgot-email" class="f-input" placeholder="you@example.com" autocomplete="email"/>
+            <span class="f-err" id="forgot-email-err">Please enter your registered email address</span>
+          </div>
+
+          <button class="btn-auth" id="forgot-btn" onclick="handleForgot()">
+            Send Reset Code
+          </button>
+
+          <div class="auth-switch">
+            Remembered your password?
+            <button onclick="showPanel('panel-login')">Sign in →</button>
+          </div>
+        </div>
+
+        <!-- Step B: Enter OTP code -->
+        <div id="forgot-step-otp" style="display:none;">
+          <div class="panel-head">
+            <span class="panel-tag">Verification Code</span>
+            <h2>Check Your Email</h2>
+            <p>We sent a 6-digit code to <strong id="forgot-email-display"></strong>. Enter it below — it expires in 10 minutes.</p>
+          </div>
+
+          <div class="auth-alert" id="otp-alert"></div>
+
+          <div class="otp-row">
+            <input class="otp-box" id="otp-1" maxlength="1" inputmode="numeric" pattern="[0-9]"/>
+            <input class="otp-box" id="otp-2" maxlength="1" inputmode="numeric" pattern="[0-9]"/>
+            <input class="otp-box" id="otp-3" maxlength="1" inputmode="numeric" pattern="[0-9]"/>
+            <input class="otp-box" id="otp-4" maxlength="1" inputmode="numeric" pattern="[0-9]"/>
+            <input class="otp-box" id="otp-5" maxlength="1" inputmode="numeric" pattern="[0-9]"/>
+            <input class="otp-box" id="otp-6" maxlength="1" inputmode="numeric" pattern="[0-9]"/>
+          </div>
+
+          <button class="btn-auth" onclick="handleOTP()">Verify Code</button>
+
+          <div class="auth-switch" style="margin-top:14px;">
+            Didn't receive it? &nbsp;
+            <button id="resend-btn" onclick="handleResend()">Resend code</button>
+          </div>
+        </div>
+
+        <!-- Step C: New password -->
+        <div id="forgot-step-newpw" style="display:none;">
+          <div class="panel-head">
+            <span class="panel-tag">New Password</span>
+            <h2>Set a New Password</h2>
+            <p>Choose a strong password you haven't used before.</p>
+          </div>
+
+          <div class="auth-alert" id="newpw-alert"></div>
+
+          <div class="f-group">
+            <label class="f-label" for="new-password">New Password <span class="f-req">*</span></label>
+            <div class="f-pw-wrap">
+              <input type="password" id="new-password" class="f-input" placeholder="Create a new password" autocomplete="new-password" oninput="checkStrength(this)"/>
+              <button type="button" class="f-pw-eye" data-target="new-password">Show</button>
+            </div>
+            <div class="f-strength" id="newpw-strength">
+              <div class="f-strength-track">
+                <div class="f-strength-fill" id="newpw-strength-fill"></div>
+              </div>
+              <span class="f-strength-label" id="newpw-strength-label">Strength: —</span>
+            </div>
+            <span class="f-err" id="new-password-err">Password must be at least 8 characters</span>
+          </div>
+
+          <div class="f-group">
+            <label class="f-label" for="new-confirm">Confirm New Password <span class="f-req">*</span></label>
+            <div class="f-pw-wrap">
+              <input type="password" id="new-confirm" class="f-input" placeholder="Repeat your new password" autocomplete="new-password"/>
+              <button type="button" class="f-pw-eye" data-target="new-confirm">Show</button>
+            </div>
+            <span class="f-err" id="new-confirm-err">Passwords do not match</span>
+          </div>
+
+          <button class="btn-auth" onclick="handleNewPassword()">Update Password</button>
+        </div>
+
+        <!-- Step D: All done -->
+        <div class="success-state" id="forgot-success">
+          <div class="success-icon-wrap">✓</div>
+          <h3>Password Updated!</h3>
+          <p>Your password has been changed successfully. You can now sign in with your new password.</p>
+          <button class="btn-auth" style="margin-top:20px;" onclick="showPanel('panel-login')">Go to Sign In →</button>
+        </div>
+
+      </div><!-- /panel-forgot -->
+
+    </div><!-- /auth-form-wrap -->
+  </div><!-- /auth-right -->
+
+</div><!-- /auth-page -->
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- Example CSS -->
+<style>
+#toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+}
+.toast {
+  background: #333;
+  color: #fff;
+  padding: 12px 20px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  opacity: 0.9;
+  font-size: 14px;
+}
+.toast.success { background: #28a745; }
+.toast.error   { background: #dc3545; }
+</style>
+
+<!-- FOOTER -->
+<div class="auth-footer">
+  <span>© 2026 U.S. Department of Education — Federal Student Aid</span>
+  <span style="display:flex; gap:16px;">
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="faq.html">Help &amp; FAQ</a>
+    <a href="tel:18004334636">1-800-433-4636</a>
+  </span>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════
+   PANEL SWITCHER
+══════════════════════════════════════════════ */
+function showPanel(id) {
+  document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
+  const panel = document.getElementById(id);
+  if (panel) panel.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function showToast(message, type = "success") {
+  const container = document.getElementById("toast-container");
+  const toast = document.createElement("div");
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+
+  container.appendChild(toast);
+
+  // Remove after 3 seconds
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+
+/* ══════════════════════════════════════════════
+   SHOW / HIDE PASSWORD TOGGLE
+══════════════════════════════════════════════ */
+document.querySelectorAll('.f-pw-eye').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const input = document.getElementById(this.dataset.target);
+    if (!input) return;
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    this.textContent = show ? 'Hide' : 'Show';
+  });
+});
+
+/* ══════════════════════════════════════════════
+   PASSWORD STRENGTH METER
+══════════════════════════════════════════════ */
+function checkStrength(input) {
+  const val = input.value;
+  const isReg   = input.id === 'reg-password';
+  const fillId  = isReg ? 'reg-strength-fill'  : 'newpw-strength-fill';
+  const labelId = isReg ? 'reg-strength-label'  : 'newpw-strength-label';
+  const wrapId  = isReg ? 'reg-strength'        : 'newpw-strength';
+
+  const wrap  = document.getElementById(wrapId);
+  const fill  = document.getElementById(fillId);
+  const label = document.getElementById(labelId);
+
+  if (!val) { wrap.classList.remove('visible'); return; }
+  wrap.classList.add('visible');
+
+  let score = 0;
+  if (val.length >= 8)               score++;
+  if (val.length >= 12)              score++;
+  if (/[A-Z]/.test(val))            score++;
+  if (/[0-9]/.test(val))            score++;
+  if (/[^A-Za-z0-9]/.test(val))     score++;
+
+  const levels = [
+    { w: '15%', bg: '#b00020', txt: 'Very Weak'  },
+    { w: '35%', bg: '#e67e22', txt: 'Weak'        },
+    { w: '55%', bg: '#f9a825', txt: 'Fair'        },
+    { w: '75%', bg: '#1a9e5e', txt: 'Strong'      },
+    { w: '100%',bg: '#1a7a4a', txt: 'Very Strong' },
+  ];
+  const lvl = levels[Math.min(score, 4)];
+  fill.style.width      = lvl.w;
+  fill.style.background = lvl.bg;
+  label.textContent     = 'Strength: ' + lvl.txt;
+  label.style.color     = lvl.bg;
+}
+
+/* ══════════════════════════════════════════════
+   VALIDATION HELPERS
+══════════════════════════════════════════════ */
+function showErr(inputId, errId, msg) {
+  const el  = document.getElementById(inputId);
+  const err = document.getElementById(errId);
+  if (el)  el.classList.add('error');
+  if (err) { if (msg) err.textContent = (err.textContent.includes('⚠') ? '' : '') + msg; err.classList.add('show'); }
+}
+function clearErr(inputId, errId) {
+  const el  = document.getElementById(inputId);
+  const err = document.getElementById(errId);
+  if (el)  el.classList.remove('error');
+  if (err) err.classList.remove('show');
+}
+function showAlert(alertId, type, msg) {
+  const el = document.getElementById(alertId);
+  if (!el) return;
+  el.className = 'auth-alert show ' + type;
+  el.textContent = msg;
+}
+function clearAlert(alertId) {
+  const el = document.getElementById(alertId);
+  if (el) { el.className = 'auth-alert'; el.textContent = ''; }
+}
+function isEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+function setLoading(btnId, loading, label) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.disabled = loading;
+  if (!loading) btn.textContent = label;
+  btn.classList.toggle('loading', loading);
+  if (loading) btn.textContent = '';
+}
+
+/* ══════════════════════════════════════════════
+   LOGIN HANDLER
+══════════════════════════════════════════════ */
+async function handleLogin() {
+  clearAlert('login-alert');
+  clearErr('login-email', 'login-email-err');
+  clearErr('login-password', 'login-password-err');
+
+  const email    = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  let valid = true;
+
+  if (!isEmail(email)) { showErr('login-email', 'login-email-err', 'Please enter a valid email address'); valid = false; }
+  if (!password)        { showErr('login-password', 'login-password-err', 'Password is required'); valid = false; }
+  if (!valid) return;
+
+  setLoading('login-btn', true);
+
+  try {
+    const res  = await fetch('http://localhost:5000/api/login', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      showToast("Login successful!", "success");
+
+      // Save token
+      sessionStorage.setItem('token', data.token);
+
+      // Redirect to dashboard
+      window.location.href = 'index.html';
+    } else {
+      showToast(data.error || "Login failed. Please try again.", "error");
+      showAlert('login-alert', 'error', data.error || 'Invalid email or password. Please try again.');
+    }
+  } catch(err) {
+    console.warn('Backend not reachable — running in demo mode');
+    showAlert('login-alert', 'info', '⚠ Demo mode: backend not running. In production this would verify your credentials.');
+  }
+
+  setLoading('login-btn', false, 'Sign In to My Account');
+}
+
+/* ══════════════════════════════════════════════
+   REGISTER HANDLER
+══════════════════════════════════════════════ */
+async function handleRegister() {
+  // Clear all errors
+  ['reg-first','reg-last','reg-email','reg-password','reg-confirm'].forEach((id, i) => {
+    clearErr(id, id + '-err');
+  });
+  clearErr('reg-terms', 'reg-terms-err');
+  clearAlert('register-alert');
+
+  const first    = document.getElementById('reg-first').value.trim();
+  const last     = document.getElementById('reg-last').value.trim();
+  const email    = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const confirm  = document.getElementById('reg-confirm').value;
+  const terms    = document.getElementById('reg-terms').checked;
+  let valid = true;
+
+  if (!first)              { showErr('reg-first',    'reg-first-err',    'First name is required');              valid = false; }
+  if (!last)               { showErr('reg-last',     'reg-last-err',     'Last name is required');               valid = false; }
+  if (!isEmail(email))     { showErr('reg-email',    'reg-email-err',    'Please enter a valid email address');  valid = false; }
+  if (password.length < 8) { showErr('reg-password', 'reg-password-err', 'Password must be at least 8 characters'); valid = false; }
+  if (password !== confirm) { showErr('reg-confirm',  'reg-confirm-err',  'Passwords do not match');              valid = false; }
+  if (!terms)              { showErr('reg-terms',    'reg-terms-err',    'You must agree to the terms');         valid = false; }
+  if (!valid) return;
+
+  setLoading('register-btn', true);
+
+  try {
+    const res  = await fetch('http://localhost:5000/api/user', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ firstName: first, lastName: last, email, password })
+    });
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      // Show success state
+      showToast("Registration successful!", "success");
+      document.querySelector('#panel-register .auth-form-wrap > *:not(#register-success)');
+      document.querySelectorAll('#panel-register > *:not(.success-state)').forEach(el => el.style.display = 'none');
+      document.getElementById('reg-success-email').textContent = email;
+      document.getElementById('register-success').classList.add('show');
+    } else {
+       showToast(data.error || "Registration failed. Please try again.", "error");
+      showAlert('register-alert', 'error', data.error || 'Registration failed. Please try again.');
+    }
+  } catch(err) {
+    // Demo mode fallback
+    document.querySelectorAll('#panel-register > *:not(.success-state)').forEach(el => el.style.display = 'none');
+    document.getElementById('reg-success-email').textContent = email;
+    document.getElementById('register-success').classList.add('show');
+  }
+
+  setLoading('register-btn', false, 'Create My Account');
+}
+
+/* ══════════════════════════════════════════════
+   FORGOT PASSWORD — STEP 1: Send Code
+══════════════════════════════════════════════ */
+async function handleForgot() {
+  clearErr('forgot-email', 'forgot-email-err');
+  clearAlert('forgot-alert');
+
+  const email = document.getElementById('forgot-email').value.trim();
+  if (!isEmail(email)) {
+    showErr('forgot-email', 'forgot-email-err', 'Please enter your registered email address');
+    return;
+  }
+
+  setLoading('forgot-btn', true);
+
+  try {
+    await fetch('http://localhost:5000/api/send-otp', {   // ✅ FIXED
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+  } catch(err) {
+    console.warn('Backend not reachable — demo mode');
+  }
+
+  // Show OTP step
+  document.getElementById('forgot-email-display').textContent = email;
+  document.getElementById('forgot-step-email').style.display = 'none';
+  document.getElementById('forgot-step-otp').style.display   = 'block';
+  document.getElementById('otp-1').focus();
+  setLoading('forgot-btn', false, 'Send Reset Code');
+}
+
+/* ══════════════════════════════════════════════
+   FORGOT PASSWORD — STEP 2: Verify OTP
+══════════════════════════════════════════════ */
+async function handleOTP() {
+  clearAlert('otp-alert');
+  const code = ['otp-1','otp-2','otp-3','otp-4','otp-5','otp-6']
+    .map(id => document.getElementById(id).value)
+    .join('');
+
+  if (code.length < 6 || !/^\d{6}$/.test(code)) {
+    showAlert('otp-alert', 'error', 'Please enter all 6 digits of your verification code.');
+    return;
+  }
+
+  const email = document.getElementById('forgot-email-display').textContent;
+
+  const res = await fetch('http://localhost:5000/api/verify-otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, otp: code })
+  });
+
+  const data = await res.json();
+  if (res.ok && data.success) {
+    document.getElementById('forgot-step-otp').style.display   = 'none';
+    document.getElementById('forgot-step-newpw').style.display = 'block';
+  } else {
+    showAlert('otp-alert', 'error', data.error || 'Invalid or expired code');
+  }
+}
+
+
+
+async function handleNewPassword() {
+  clearErr('new-password', 'new-password-err');
+  clearErr('new-confirm',  'new-confirm-err');
+  clearAlert('newpw-alert');
+
+  const pw  = document.getElementById('new-password').value;
+  const pw2 = document.getElementById('new-confirm').value;
+  let valid = true;
+
+  if (pw.length < 8) { showErr('new-password', 'new-password-err', 'Password must be at least 8 characters'); valid = false; }
+  if (pw !== pw2)     { showErr('new-confirm',  'new-confirm-err',  'Passwords do not match'); valid = false; }
+  if (!valid) return;
+
+  const email = document.getElementById('forgot-email-display').textContent;
+
+  const res = await fetch('http://localhost:5000/api/reset-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, newPassword: pw })
+  });
+
+  const data = await res.json();
+  if (res.ok && data.success) {
+    document.getElementById('forgot-step-newpw').style.display = 'none';
+    document.getElementById('forgot-success').classList.add('show');
+    showToast("Password reset successful!", "success");
+  } else {
+    showAlert('newpw-alert', 'error', data.error || 'Failed to reset password');
+  }
+}
+
+/* ══════════════════════════════════════════════
+   RESEND CODE
+══════════════════════════════════════════════ */
+function handleResend() {
+  const btn = document.getElementById('resend-btn');
+  btn.disabled = true;
+  showAlert('otp-alert', 'success', 'A new code has been sent to your email address.');
+  let secs = 60;
+  btn.textContent = `Resend in ${secs}s`;
+  const interval = setInterval(() => {
+    secs--;
+    btn.textContent = secs > 0 ? `Resend in ${secs}s` : 'Resend code';
+    if (secs <= 0) { clearInterval(interval); btn.disabled = false; }
+  }, 1000);
+}
+
+/* ══════════════════════════════════════════════
+   OTP BOX — AUTO ADVANCE ON INPUT
+══════════════════════════════════════════════ */
+const otpBoxes = document.querySelectorAll('.otp-box');
+otpBoxes.forEach((box, i) => {
+  box.addEventListener('input', () => {
+    box.value = box.value.replace(/\D/g, '');
+    if (box.value && i < otpBoxes.length - 1) otpBoxes[i + 1].focus();
+  });
+  box.addEventListener('keydown', e => {
+    if (e.key === 'Backspace' && !box.value && i > 0) otpBoxes[i - 1].focus();
+  });
+  box.addEventListener('paste', e => {
+    e.preventDefault();
+    const digits = (e.clipboardData.getData('text') || '').replace(/\D/g,'').slice(0,6);
+    digits.split('').forEach((d, j) => {
+      if (otpBoxes[j]) otpBoxes[j].value = d;
+    });
+    if (otpBoxes[Math.min(digits.length, 5)]) otpBoxes[Math.min(digits.length, 5)].focus();
+  });
+});
+
+/* ══════════════════════════════════════════════
+   ENTER KEY — SUBMIT ACTIVE PANEL
+══════════════════════════════════════════════ */
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const active = document.querySelector('.auth-panel.active');
+  if (!active) return;
+  if (active.id === 'panel-login')    handleLogin();
+  if (active.id === 'panel-register') handleRegister();
+  if (active.id === 'panel-forgot') {
+    const emailStep = document.getElementById('forgot-step-email');
+    const otpStep   = document.getElementById('forgot-step-otp');
+    const pwStep    = document.getElementById('forgot-step-newpw');
+    if (emailStep.style.display !== 'none' && emailStep.style.display !== '') handleForgot();
+    if (otpStep.style.display   === 'block') handleOTP();
+    if (pwStep.style.display    === 'block') handleNewPassword();
+  }
+});
+
+/* ══════════════════════════════════════════════
+   MOBILE NAV
+══════════════════════════════════════════════ */
+document.getElementById('hamburger').addEventListener('click', () => {
+  document.getElementById('mobileMenu').classList.toggle('open');
+});
+</script>
+</body>
+</html>

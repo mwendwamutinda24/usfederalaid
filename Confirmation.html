@@ -1,0 +1,449 @@
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const token = sessionStorage.getItem("token");
+    if (!token) {
+      // No token → redirect to login
+      window.location.href = "Auth.html";
+    }
+  });
+</script>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Application Submitted — Federal Student Aid</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    body { background: #f4f6fa; }
+
+    .conf-outer { max-width: 780px; margin: 0 auto; padding: 48px 24px 80px; }
+
+    /* ── Success banner ── */
+    .success-banner {
+      background: #fff;
+      border: 1px solid #dde2ec;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .success-banner-top {
+      background: linear-gradient(135deg, #0d1b3e 0%, #1a3070 100%);
+      padding: 36px 40px;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    .success-circle {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: #1a7a4a;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+      flex-shrink: 0;
+      box-shadow: 0 0 0 10px rgba(26,122,74,.2);
+      animation: successPulse 2.2s ease infinite;
+    }
+    @keyframes successPulse {
+      0%,100% { box-shadow: 0 0 0 10px rgba(26,122,74,.2); }
+      50%      { box-shadow: 0 0 0 18px rgba(26,122,74,.1); }
+    }
+    .success-text h1 { color: #fff; font-size: 1.6rem; margin-bottom: 6px; }
+    .success-text p  { color: rgba(255,255,255,.65); font-size: .92rem; }
+
+    /* ── Confirmation number card ── */
+    .conf-num-card {
+      padding: 28px 40px;
+      border-bottom: 1px solid #eef0f5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+    .conf-num-label { font-size: .7rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #8a94a6; margin-bottom: 6px; }
+    .conf-num       { font-size: 1.9rem; font-weight: 800; color: #0d1b3e; letter-spacing: .06em; font-family: 'Source Sans 3', monospace; }
+    .conf-num-date  { font-size: .78rem; color: #9aa0b0; margin-top: 4px; }
+    .conf-copy-btn  {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 18px; border-radius: 6px;
+      border: 1px solid #d0d6e4; background: #f4f6fa;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: .78rem; font-weight: 700;
+      color: #5a6478; cursor: pointer; letter-spacing: .05em;
+      text-transform: uppercase; transition: all .15s;
+    }
+    .conf-copy-btn:hover  { background: #0d1b3e; color: #fff; border-color: #0d1b3e; }
+    .conf-copy-btn.copied { background: #1a7a4a; color: #fff; border-color: #1a7a4a; }
+
+    /* ── Email sent notice ── */
+    .email-notice {
+      margin: 0 40px 0;
+      padding: 16px 20px;
+      background: #e8f4fd;
+      border-left: 4px solid #1a73e8;
+      border-radius: 0 6px 6px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .email-notice-icon {
+      width: 38px; height: 38px;
+      background: #1a73e8;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .email-notice-text h4 { font-size: .92rem; color: #0d47a1; margin-bottom: 4px; font-family: 'Source Sans 3', sans-serif; }
+    .email-notice-text p  { font-size: .82rem; color: #1a5276; line-height: 1.55; margin: 0; }
+    .email-notice-text strong { color: #0d47a1; }
+
+    /* offline warning */
+    .offline-notice {
+      margin: 16px 40px 0;
+      padding: 12px 16px;
+      background: #fff8e1;
+      border-left: 4px solid #f9a825;
+      border-radius: 0 6px 6px 0;
+      font-size: .82rem; color: #7a5c00;
+    }
+
+    /* ── Aid estimate box ── */
+    .aid-box {
+      margin: 24px 40px 0;
+      padding: 20px 24px;
+      background: #e6f4ea;
+      border: 1px solid #a8d5b5;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .aid-amount { font-size: 2rem; font-weight: 800; color: #145e38; line-height: 1; }
+    .aid-label  { font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: #2a7a50; margin-bottom: 4px; }
+    .aid-note   { font-size: .8rem; color: #2a7a50; line-height: 1.5; }
+    .aid-divider{ width: 1px; background: #a8d5b5; align-self: stretch; flex-shrink: 0; }
+
+    /* spacer inside banner */
+    .banner-spacer { height: 28px; }
+
+    /* ── What happens next (timeline) ── */
+    .section-card {
+      background: #fff;
+      border: 1px solid #dde2ec;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .section-card-head {
+      background: #f4f6fa;
+      border-bottom: 1px solid #dde2ec;
+      padding: 13px 28px;
+      font-size: .7rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: #5a6478;
+    }
+    .section-card-body { padding: 28px; }
+
+    .tl { position: relative; padding-left: 36px; }
+    .tl::before {
+      content: ''; position: absolute;
+      left: 12px; top: 16px; bottom: 16px;
+      width: 2px; background: #eef0f5;
+    }
+    .tl-item { position: relative; margin-bottom: 22px; }
+    .tl-item:last-child { margin-bottom: 0; }
+    .tl-dot {
+      position: absolute; left: -36px; top: 2px;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: #0d1b3e;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .7rem; font-weight: 800; color: #fff;
+      border: 3px solid #f4f6fa;
+    }
+    .tl-dot.done { background: #1a7a4a; }
+    .tl-item h4  { font-size: .92rem; font-weight: 700; color: #0d1b3e; margin-bottom: 3px; font-family: 'Source Sans 3', sans-serif; }
+    .tl-item p   { font-size: .82rem; color: #5a6478; line-height: 1.55; margin-bottom: 4px; }
+    .tl-badge    { display: inline-block; font-size: .7rem; font-weight: 700; padding: 2px 10px; border-radius: 20px; }
+    .badge-done  { background: #e6f4ea; color: #145e38; }
+    .badge-next  { background: #f0f4fb; color: #0d1b3e; }
+
+    /* ── Actions ── */
+    .conf-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 8px; }
+    .btn-conf-primary {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 12px 26px; border-radius: 6px;
+      background: #0d1b3e; color: #fff;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: .85rem; font-weight: 700;
+      letter-spacing: .05em; text-transform: uppercase;
+      border: none; cursor: pointer; text-decoration: none;
+      transition: background .15s;
+    }
+    .btn-conf-primary:hover { background: #001540; color: #fff; }
+    .btn-conf-outline {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 11px 24px; border-radius: 6px;
+      background: #fff; color: #0d1b3e;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: .85rem; font-weight: 700;
+      letter-spacing: .05em; text-transform: uppercase;
+      border: 1px solid #d0d6e4; cursor: pointer; text-decoration: none;
+      transition: all .15s;
+    }
+    .btn-conf-outline:hover { background: #f0f4fb; border-color: #0d1b3e; color: #0d1b3e; }
+
+    @media(max-width:600px) {
+      .success-banner-top { flex-direction: column; padding: 28px 24px; gap: 16px; }
+      .conf-num-card  { padding: 22px 24px; }
+      .email-notice, .offline-notice, .aid-box { margin-left: 24px; margin-right: 24px; }
+      .conf-actions { flex-direction: column; align-items: stretch; }
+      .conf-actions a, .conf-actions button { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-seal">🎓</div>
+      <div class="logo-text">Federal Student Aid<span>U.S. Department of Education</span></div>
+    </a>
+    <nav class="nav">
+      <a href="index.html">Home</a>
+      <a href="eligibility.html">Eligibility</a>
+      <a href="faq.html">Help &amp; FAQ</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="application.html" class="nav-cta">New Application</a>
+    </nav>
+    <button class="hamburger" id="hamburger" aria-label="Open menu"><span></span><span></span><span></span></button>
+  </div>
+  <nav class="mobile-menu" id="mobileMenu">
+    <a href="index.html">Home</a>
+    <a href="eligibility.html">Eligibility</a>
+    <a href="faq.html">FAQ</a>
+    <a href="privacy.html">Privacy</a>
+    <a href="application.html">Apply Again →</a>
+  </nav>
+</header>
+
+<main>
+  <div class="conf-outer">
+
+    <!-- ── SUCCESS BANNER ── -->
+    <div class="success-banner">
+      <div class="success-banner-top">
+        <div class="success-circle">✓</div>
+        <div class="success-text">
+          <h1>Application Successfully Submitted!</h1>
+          <p id="bannerSub">Your federal student aid application has been received and is now being processed.</p>
+        </div>
+      </div>
+
+      <!-- Confirmation number row -->
+      <div class="conf-num-card">
+        <div>
+          <div class="conf-num-label">Your Confirmation Number</div>
+          <div class="conf-num" id="confNum">FSA-LOADING…</div>
+          <div class="conf-num-date" id="confDate"></div>
+        </div>
+        <button class="conf-copy-btn" id="copyBtn" onclick="copyConfNumber()">
+          📋 Copy Number
+        </button>
+      </div>
+
+      <!-- Email sent notice -->
+      <div class="email-notice" id="emailNotice">
+        <div class="email-notice-icon">📧</div>
+        <div class="email-notice-text">
+          <h4>Confirmation Email Sent</h4>
+          <p>A confirmation email has been dispatched to <strong id="emailTarget">your registered address</strong>. It contains your confirmation number, a summary of your application, and the next steps. If you don't see it within 10 minutes, check your <strong>Spam / Junk</strong> folder.</p>
+        </div>
+      </div>
+
+      <!-- Shown only when API was unreachable -->
+      <div class="offline-notice" id="offlineNotice" style="display:none;">
+        ⚠ <strong>Note:</strong> The server could not be reached right now, so your confirmation email may be delayed. Please note your confirmation number above and contact us at <strong>1-800-433-4636</strong> if you do not receive an email within 24 hours.
+      </div>
+
+      <!-- Estimated aid (shown when API returns it) -->
+      <div class="aid-box" id="aidBox" style="display:none;">
+        <div>
+          <div class="aid-label">Estimated Aid Package</div>
+          <div class="aid-amount" id="aidAmount">$0</div>
+        </div>
+        <div class="aid-divider"></div>
+        <div class="aid-note" id="aidNote"></div>
+      </div>
+
+      <div class="banner-spacer"></div>
+    </div>
+
+    <!-- ── WHAT HAPPENS NEXT ── -->
+    <div class="section-card">
+      <div class="section-card-head">What Happens Next</div>
+      <div class="section-card-body">
+        <div class="tl">
+          <div class="tl-item">
+            <div class="tl-dot done">✓</div>
+            <h4>Application Received</h4>
+            <p>Your application has been securely submitted and is in our system.</p>
+            <span class="tl-badge badge-done">✅ Completed</span>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot done">✓</div>
+            <h4>Confirmation Email Sent</h4>
+            <p>An email with your confirmation number and application summary has been sent to your inbox.</p>
+            <span class="tl-badge badge-done">✅ Email Dispatched</span>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot">3</div>
+            <h4>Identity Verification</h4>
+            <p>We verify your Social Security Number and personal details with federal databases (SSA).</p>
+            <span class="tl-badge badge-next">⏳ 1–2 Business Days</span>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot">4</div>
+            <h4>Financial Review</h4>
+            <p>Your Student Aid Index (SAI) is calculated based on your income and dependency status.</p>
+            <span class="tl-badge badge-next">⏳ 2–3 Business Days</span>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot">5</div>
+            <h4>Student Aid Report (SAR) Emailed</h4>
+            <p>Your SAR will arrive by email with your full estimated aid package breakdown.</p>
+            <span class="tl-badge badge-next">⏳ 3–5 Business Days</span>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot">6</div>
+            <h4>Aid Offer from Your School</h4>
+            <p>Your institution's financial aid office will send a formal offer letter after reviewing your SAR.</p>
+            <span class="tl-badge badge-next">⏳ 2–4 Weeks</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ACTIONS ── -->
+    <div class="section-card">
+      <div class="section-card-head">Actions</div>
+      <div class="section-card-body">
+        <div class="conf-actions">
+          <a href="index.html" class="btn-conf-outline">← Return to Home</a>
+          <a href="faq.html"   class="btn-conf-outline">📖 Help &amp; FAQ</a>
+          <button class="btn-conf-primary" onclick="window.print()">🖨 Print Confirmation</button>
+        </div>
+        <p style="text-align:center; margin-top:20px; font-size:.8rem; color:#8a94a6;">
+          Questions? Call <a href="tel:18004334636" style="color:#0d1b3e; font-weight:700;">1-800-433-4636</a>
+          &nbsp;·&nbsp; Mon–Fri, 8 AM – 8 PM ET
+        </p>
+      </div>
+    </div>
+
+  </div><!-- /conf-outer -->
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom">
+      <span>© 2026 U.S. Department of Education. Federal Student Aid.</span>
+      <span class="secure-badge">🔒 Secure &amp; Encrypted</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  /* ──────────────────────────────────
+     Load confirmation data from
+     sessionStorage (set by application.html)
+  ────────────────────────────────── */
+  document.getElementById('hamburger').addEventListener('click', () => {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  });
+
+  (function loadConfirmation() {
+    let data = null;
+
+    try {
+      const raw = sessionStorage.getItem('fsaConf');
+      if (raw) data = JSON.parse(raw);
+    } catch(e) {}
+
+    // Legacy fallback — old pages stored just a string
+    if (!data) {
+      const legacy = sessionStorage.getItem('fsaConf');
+      if (legacy && !legacy.startsWith('{')) {
+        data = { confirmationNumber: legacy };
+      }
+    }
+
+    if (!data) {
+      // Nothing in storage — user may have refreshed the page
+      document.getElementById('confNum').textContent  = 'N/A — Please check your email';
+      document.getElementById('bannerSub').textContent = 'If you already submitted, check your email for your confirmation number.';
+      return;
+    }
+
+    // ── Confirmation number ──
+    document.getElementById('confNum').textContent = data.confirmationNumber || '—';
+
+    // ── Submitted date ──
+    if (data.submittedAt) {
+      document.getElementById('confDate').textContent = 'Submitted: ' + data.submittedAt;
+    }
+
+    // ── Email address in notice ──
+    if (data.email) {
+      document.getElementById('emailTarget').textContent = data.email;
+    }
+
+    // ── Personalise banner subtitle ──
+    if (data.firstName) {
+      document.getElementById('bannerSub').textContent =
+        `Thank you, ${data.firstName} ${data.lastName || ''}. Your application has been received and is now being processed.`;
+    }
+
+    // ── Offline / backend unreachable notice ──
+    if (data.offline) {
+      document.getElementById('offlineNotice').style.display = 'block';
+      document.getElementById('emailNotice').style.background = '#fff8e1';
+      document.getElementById('emailNotice').style.borderLeftColor = '#f9a825';
+      document.getElementById('emailNotice').querySelector('h4').style.color = '#7a5c00';
+      document.getElementById('emailNotice').querySelector('h4').textContent = 'Email Pending';
+      document.getElementById('emailNotice').querySelector('p').style.color = '#7a5c00';
+      document.getElementById('emailNotice').querySelector('p').innerHTML =
+        'We could not connect to the server right now. Your email will be sent once the connection is restored, or contact us at <strong>1-800-433-4636</strong>.';
+      document.getElementById('emailNotice').querySelector('.email-notice-icon').textContent = '⚠';
+      document.getElementById('emailNotice').querySelector('.email-notice-icon').style.background = '#f9a825';
+    }
+
+    // ── Estimated aid ──
+    if (data.estimatedAid && data.estimatedAid.total > 0) {
+      document.getElementById('aidBox').style.display    = 'flex';
+      document.getElementById('aidAmount').textContent   = '$' + Number(data.estimatedAid.total).toLocaleString();
+      document.getElementById('aidNote').textContent     = data.estimatedAid.note || '';
+    }
+  })();
+
+  /* ──────────────────────────────────
+     Copy confirmation number
+  ────────────────────────────────── */
+  function copyConfNumber() {
+    const num = document.getElementById('confNum').textContent;
+    if (!num || num === 'N/A — Please check your email') return;
+
+    navigator.clipboard.writeText(num).then(() => {
+      const btn = document.getElementById('copyBtn');
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = '📋 Copy Number';
+        btn.classList.remove('copied');
+      }, 2500);
+    });
+  }
+</script>
+</body>
+</html> 

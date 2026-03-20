@@ -1,0 +1,704 @@
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const token = sessionStorage.getItem("token");
+    if (!token) {
+      // No token → redirect to login
+      window.location.href = "Auth.html";
+    }
+  });
+</script>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="Apply for U.S. Federal Student Aid online. Check eligibility, fill your application, and get funding for college."/>
+  <title>Federal Student Aid — Apply for Financial Assistance</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>"/>
+  <style>
+    /* ── FULL-WIDTH COUNTDOWN BANNER ── */
+    .cd-banner {
+      background: #0d1b3e;
+      border-bottom: 4px solid #c8a800;
+      padding: 0;
+      width: 100%;
+    }
+    .cd-banner-inner {
+      max-width: 100%;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: stretch;
+    }
+
+    /* Left label block */
+    .cd-banner-label {
+      background: #c8a800;
+      padding: 0 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-width: 180px;
+    }
+    .cd-banner-label .cd-bl-top {
+      font-size: .62rem;
+      font-weight: 800;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: #7a5800;
+      margin-bottom: 4px;
+    }
+    .cd-banner-label .cd-bl-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #0d1b3e;
+      line-height: 1.2;
+      font-family: 'Playfair Display', serif;
+    }
+    .cd-banner-label .cd-bl-date {
+      font-size: .72rem;
+      font-weight: 700;
+      color: #0d1b3e;
+      margin-top: 3px;
+      letter-spacing: .04em;
+    }
+
+    /* Center: digit blocks */
+    .cd-banner-digits {
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      gap: 0;
+      padding: 0 32px;
+    }
+    .cd-bd-unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 18px 28px;
+      position: relative;
+    }
+    .cd-bd-unit + .cd-bd-unit::before {
+      content: ':';
+      position: absolute;
+      left: -4px;
+      top: 50%;
+      transform: translateY(-60%);
+      font-size: 2rem;
+      font-weight: 700;
+      color: rgba(255,255,255,.25);
+      font-family: 'Playfair Display', serif;
+    }
+    .cd-bd-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: 1;
+      letter-spacing: .04em;
+      font-variant-numeric: tabular-nums;
+      min-width: 2.4ch;
+      text-align: center;
+      display: block;
+    }
+    .cd-bd-lbl {
+      font-size: .6rem;
+      font-weight: 800;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.4);
+      margin-top: 6px;
+    }
+
+    /* Right: progress + CTA */
+    .cd-banner-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 0 36px;
+      gap: 10px;
+      min-width: 240px;
+    }
+    .cd-br-progress { width: 100%; }
+    .cd-br-progress-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: .67rem;
+      color: rgba(255,255,255,.4);
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .cd-br-track {
+      background: rgba(255,255,255,.12);
+      height: 4px;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .cd-br-fill {
+      height: 100%;
+      background: #c8a800;
+      border-radius: 2px;
+      width: 0%;
+      transition: width 1s linear;
+    }
+    .cd-br-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: #c8a800;
+      color: #0d1b3e;
+      padding: 10px 22px;
+      border-radius: 6px;
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background .15s;
+    }
+    .cd-br-cta:hover { background: #e0b800; color: #0d1b3e; }
+
+    /* Urgency pulse on last 7 days */
+    .cd-bd-num.urgent { color: #ff6b6b; animation: urgentPulse 1s ease infinite; }
+    @keyframes urgentPulse {
+      0%,100% { opacity: 1; }
+      50%      { opacity: .6; }
+    }
+
+    /* Expired state */
+    .cd-banner.expired .cd-banner-label { background: #555; }
+    .cd-banner.expired .cd-bd-num       { color: rgba(255,255,255,.4); }
+    .cd-banner.expired .cd-br-fill      { background: #888; }
+    .cd-expired-msg {
+      display: none;
+      text-align: center;
+      padding: 12px 24px;
+      font-size: .85rem;
+      font-weight: 600;
+      color: #c8a800;
+      background: rgba(200,168,0,.08);
+      width: 100%;
+    }
+    .cd-banner.expired .cd-expired-msg { display: block; }
+
+    /* ── HERO ── */
+    .hero {
+      background: #f9fafc;
+      border-bottom: 1px solid #dde2ec;
+      padding: 72px 0 64px;
+    }
+    .hero-inner {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 56px;
+      align-items: center;
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: .75rem; font-weight: 700; letter-spacing: .14em;
+      text-transform: uppercase; color: var(--navy);
+      border-left: 3px solid var(--navy);
+      padding-left: 10px; margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 3.8vw, 3rem);
+      color: #0d1b3e;
+      line-height: 1.15;
+      margin-bottom: 18px;
+    }
+    .hero-copy {
+      font-size: 1.05rem;
+      color: #5a6478;
+      margin-bottom: 32px;
+      max-width: 480px;
+      line-height: 1.75;
+    }
+    .hero-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    /* Expired banner (inside hero) */
+    .expired-msg {
+      display: none;
+      background: #fff8e1; border: 1px solid #c8a800;
+      border-radius: 8px; padding: 14px 18px;
+      font-size: .88rem; color: #7a5800; font-weight: 600;
+      margin-top: 16px;
+    }
+
+    /* ── STATS STRIP ── */
+    .stats-strip {
+      background: #fff;
+      border-bottom: 1px solid #dde2ec;
+      padding: 30px 0;
+    }
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .stat-box {
+      text-align: center;
+      padding: 0 20px;
+      border-right: 1px solid #dde2ec;
+    }
+    .stat-box:last-child { border-right: none; }
+    .stat-num2 {
+      display: block;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.9rem; font-weight: 700;
+      color: var(--navy); line-height: 1;
+      margin-bottom: 5px;
+    }
+    .stat-lbl2 {
+      font-size: .72rem; font-weight: 700;
+      letter-spacing: .09em; text-transform: uppercase;
+      color: #8a94a6;
+    }
+
+    /* ── HOW IT WORKS ── */
+    .how-section {
+      background: #f9fafc;
+      padding: 72px 0;
+      border-bottom: 1px solid #dde2ec;
+    }
+    .sec-tag  { font-size: .72rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--navy); display: inline-block; margin-bottom: 10px; }
+    .sec-h2   { font-size: clamp(1.4rem,2.5vw,1.9rem); color: #0d1b3e; margin-bottom: 8px; }
+    .sec-sub  { font-size: .92rem; color: #5a6478; max-width: 500px; margin-bottom: 40px; }
+
+    .how-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: #dde2ec;
+      border: 1px solid #dde2ec;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .how-card { background: #fff; padding: 32px 22px; }
+    .how-num  { font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 700; color: #e0e5f0; line-height: 1; margin-bottom: 14px; }
+    .how-card h3 { font-size: .97rem; color: #0d1b3e; margin-bottom: 8px; }
+    .how-card p  { font-size: .84rem; color: #5a6478; line-height: 1.65; }
+
+    /* ── AID TABLE ── */
+    .aid-section { background: #fff; padding: 72px 0; border-bottom: 1px solid #dde2ec; }
+    .aid-tbl { width: 100%; border-collapse: collapse; margin-top: 28px; font-size: .9rem; }
+    .aid-tbl th {
+      text-align: left; padding: 11px 18px;
+      font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      color: #8a94a6; border-bottom: 2px solid #dde2ec; background: #f9fafc;
+    }
+    .aid-tbl td { padding: 16px 18px; color: #3a4255; border-bottom: 1px solid #eef0f5; vertical-align: top; }
+    .aid-tbl tr:last-child td { border-bottom: none; }
+    .aid-tbl tr:hover td { background: #f9fafc; }
+    .aid-tbl td b { display: block; color: #0d1b3e; font-size: .92rem; margin-bottom: 3px; }
+    .aid-tag { display: inline-block; background: #e8ecf4; color: var(--navy); font-size: .68rem; font-weight: 700; padding: 2px 8px; border-radius: 3px; text-transform: uppercase; letter-spacing: .05em; margin-top: 3px; }
+    .no-badge { color: #1a7a4a; font-weight: 700; }
+    .yes-badge { color: #555; }
+
+    /* ── CTA BAND ── */
+    .cta-band { background: #0d1b3e; padding: 60px 0; text-align: center; }
+    .cta-band h2 { color: #fff; font-size: clamp(1.4rem,2.5vw,1.9rem); margin-bottom: 10px; }
+    .cta-band p  { color: rgba(255,255,255,.6); margin-bottom: 28px; font-size: .92rem; }
+    .cta-band .cta-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: #fff; color: #0d1b3e;
+      padding: 15px 32px; border-radius: 8px;
+      font-weight: 700; font-size: .95rem;
+      letter-spacing: .04em; text-transform: uppercase;
+      text-decoration: none; transition: background .2s;
+    }
+    .cta-band .cta-btn:hover { background: #e8ecf4; color: #0d1b3e; }
+    .trust-row { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin-top: 20px; }
+    .trust-item { font-size: .75rem; font-weight: 700; letter-spacing: .05em; color: rgba(255,255,255,.4); display: flex; align-items: center; gap: 5px; }
+    .trust-item::before { content: '✓'; }
+
+    /* Countdown banner responsive */
+    @media(max-width:960px){
+      .cd-banner-inner { grid-template-columns: 1fr; }
+      .cd-banner-label { flex-direction: row; gap: 20px; padding: 14px 24px; min-width: unset; justify-content: flex-start; }
+      .cd-banner-digits { padding: 0 16px; gap: 0; justify-content: space-around; }
+      .cd-bd-unit { padding: 14px 12px; }
+      .cd-bd-num { font-size: 2.2rem; }
+      .cd-banner-right { min-width: unset; padding: 14px 24px; flex-direction: row; align-items: center; }
+      .cd-br-progress { flex: 1; }
+    }
+    @media(max-width:640px){
+      .cd-banner-label .cd-bl-title { font-size: .85rem; }
+      .cd-bd-num { font-size: 1.8rem; }
+      .cd-bd-unit { padding: 12px 8px; }
+      .cd-bd-unit + .cd-bd-unit::before { font-size: 1.4rem; }
+      .cd-banner-right { flex-direction: column; align-items: stretch; }
+      .cd-br-cta { text-align: center; justify-content: center; }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:960px){
+      .hero-inner { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: 1fr 1fr; gap: 0; }
+      .stat-box:nth-child(2){ border-right: none; }
+      .stat-box:nth-child(1),.stat-box:nth-child(2){ border-bottom: 1px solid #dde2ec; padding-bottom: 22px; margin-bottom: 22px; }
+      .how-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media(max-width:600px){
+      .hero { padding: 40px 0 48px; }
+      .how-grid { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .cd-num { font-size: 2rem; }
+      .aid-tbl thead { display: none; }
+      .aid-tbl td { display: block; padding: 6px 14px; }
+      .aid-tbl tr { display: block; border-bottom: 2px solid #eef0f5; padding: 10px 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ FULL-WIDTH COUNTDOWN BANNER ═══ -->
+<div class="cd-banner" id="cdBanner" role="timer" aria-live="polite" aria-label="Time remaining until application deadline">
+  <div class="cd-banner-inner">
+
+    <!-- Label -->
+    <div class="cd-banner-label">
+      <span class="cd-bl-top">Deadline</span>
+      <span class="cd-bl-title">Apply Before</span>
+      <span class="cd-bl-date">May 8, 2026</span>
+    </div>
+
+    <!-- Digits -->
+    <div class="cd-banner-digits">
+      <div class="cd-bd-unit">
+        <span class="cd-bd-num" id="cd-days">--</span>
+        <span class="cd-bd-lbl">Days</span>
+      </div>
+      <div class="cd-bd-unit">
+        <span class="cd-bd-num" id="cd-hours">--</span>
+        <span class="cd-bd-lbl">Hours</span>
+      </div>
+      <div class="cd-bd-unit">
+        <span class="cd-bd-num" id="cd-mins">--</span>
+        <span class="cd-bd-lbl">Minutes</span>
+      </div>
+      <div class="cd-bd-unit">
+        <span class="cd-bd-num" id="cd-secs">--</span>
+        <span class="cd-bd-lbl">Seconds</span>
+      </div>
+    </div>
+
+    <!-- Progress + CTA -->
+    <div class="cd-banner-right">
+      <div class="cd-br-progress">
+        <div class="cd-br-progress-row">
+          <span>Window progress</span>
+          <span id="cd-pct-label">Calculating…</span>
+        </div>
+        <div class="cd-br-track">
+          <div class="cd-br-fill" id="cd-fill"></div>
+        </div>
+      </div>
+      <a href="application.html" class="cd-br-cta">Apply Now →</a>
+    </div>
+
+  </div>
+  <div class="cd-expired-msg">
+    ⚠ The application window has closed. The next cycle opens October 1, 2026.
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-seal">🎓</div>
+      <div class="logo-text">
+        Federal Student Aid
+        <span>U.S. Department of Education</span>
+      </div>
+    </a>
+    <nav class="nav" aria-label="Main navigation">
+      <a href="index.html" class="active">Home</a>
+      <a href="eligibility.html">Eligibility</a>
+      <a href="faq.html">Help &amp; FAQ</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="application.html" class="nav-cta">Apply Now</a>
+    </nav>
+    <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <nav class="mobile-menu" id="mobileMenu">
+    <a href="index.html">Home</a>
+    <a href="eligibility.html">Eligibility</a>
+    <a href="faq.html">Help &amp; FAQ</a>
+    <a href="privacy.html">Privacy Policy</a>
+    <a href="application.html">Apply Now →</a>
+  </nav>
+</header>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-inner">
+
+      <!-- LEFT: Copy -->
+      <div>
+        <div class="hero-eyebrow">Official U.S. Government Portal</div>
+        <h1>Apply for Federal<br>Student Aid</h1>
+        <p class="hero-copy">Millions of students receive federal grants, loans, and work-study funds each year. The application is completely free and takes approximately 30 minutes to complete.</p>
+        <div class="hero-btns">
+          <a href="application.html" class="btn btn-primary btn-lg">Start My Application →</a>
+          <a href="eligibility.html" class="btn btn-outline btn-lg">Check Eligibility</a>
+        </div>
+        <div class="expired-msg" id="expiredMsg">
+          ⚠️ The current application window has closed. The next cycle opens October 1, 2026.
+          <a href="faq.html">Learn more →</a>
+        </div>
+      </div>
+
+
+
+    </div>
+  </div>
+</section>
+
+<!-- STATS STRIP -->
+<div class="stats-strip">
+  <div class="container">
+    <div class="stats-row">
+      <div class="stat-box">
+        <span class="stat-num2">$120B+</span>
+        <span class="stat-lbl2">Awarded Annually</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-num2">13M+</span>
+        <span class="stat-lbl2">Students Helped</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-num2">6,400+</span>
+        <span class="stat-lbl2">Eligible Schools</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-num2">$0</span>
+        <span class="stat-lbl2">Application Fee</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="how-section">
+  <div class="container">
+    <span class="sec-tag">Process</span>
+    <h2 class="sec-h2">How the Application Works</h2>
+    <p class="sec-sub">Four straightforward steps. No fees. Approximately 30 minutes with documents ready.</p>
+    <div class="how-grid">
+      <div class="how-card">
+        <div class="how-num">01</div>
+        <h3>Review Eligibility</h3>
+        <p>Check citizenship, enrollment status, and SSN requirements before you begin your application.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-num">02</div>
+        <h3>Complete the Form</h3>
+        <p>Fill out the secure 5-step application with your personal, contact, and financial information.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-num">03</div>
+        <h3>Review &amp; Submit</h3>
+        <p>Verify all entries on the summary page, then submit with your digital certification.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-num">04</div>
+        <h3>Receive Your Report</h3>
+        <p>Your Student Aid Report (SAR) arrives by email within 3–5 business days of submission.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AID TYPES -->
+<section class="aid-section">
+  <div class="container">
+    <span class="sec-tag">Programs</span>
+    <h2 class="sec-h2">Types of Federal Aid Available</h2>
+    <p class="sec-sub">All programs are accessed through a single application at no cost.</p>
+    <table class="aid-tbl" role="table">
+      <thead>
+        <tr>
+          <th>Aid Program</th>
+          <th>Description</th>
+          <th>Repayment?</th>
+          <th>Maximum Award</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>Pell Grant</b><span class="aid-tag">Grant</span></td>
+          <td>Need-based grant for undergraduates who have not yet earned a bachelor's degree.</td>
+          <td><span class="no-badge">No</span></td>
+          <td>$7,395 / year</td>
+        </tr>
+        <tr>
+          <td><b>FSEOG Grant</b><span class="aid-tag">Grant</span></td>
+          <td>Supplemental grant for students with exceptional financial need. Awarded through schools.</td>
+          <td><span class="no-badge">No</span></td>
+          <td>$4,000 / year</td>
+        </tr>
+        <tr>
+          <td><b>Direct Subsidized Loans</b><span class="aid-tag">Loan</span></td>
+          <td>Need-based. Government covers interest while enrolled at least half-time.</td>
+          <td><span class="yes-badge">Yes</span></td>
+          <td>$5,500 / year</td>
+        </tr>
+        <tr>
+          <td><b>Direct Unsubsidized Loans</b><span class="aid-tag">Loan</span></td>
+          <td>Not need-based. Interest accrues during all periods including enrollment.</td>
+          <td><span class="yes-badge">Yes</span></td>
+          <td>$20,500 / year</td>
+        </tr>
+        <tr>
+          <td><b>Federal Work-Study</b><span class="aid-tag">Employment</span></td>
+          <td>Part-time employment at your school or an approved off-campus site.</td>
+          <td><span class="no-badge">No (earned wages)</span></td>
+          <td>Varies by school</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- CTA BAND -->
+<section class="cta-band">
+  <div class="container">
+    <h2>Don't Miss the May 8, 2026 Deadline</h2>
+    <p>The application is free. Apply early to maximize your aid award for the upcoming academic year.</p>
+    <a href="application.html" class="cta-btn">Start My Free Application →</a>
+    <div class="trust-row">
+      <span class="trust-item">256-bit SSL Encryption</span>
+      <span class="trust-item">FERPA Compliant</span>
+      <span class="trust-item">No Application Fee</span>
+      <span class="trust-item">Official Government Portal</span>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="index.html" class="logo" style="color:var(--white);">
+          <div class="logo-seal">🎓</div>
+          <div class="logo-text">Federal Student Aid<span>U.S. Department of Education</span></div>
+        </a>
+        <p style="margin-top:14px;">Helping students access the financial resources they need to pursue higher education since 1958.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Applications</h4>
+        <a href="application.html">Start Application</a>
+        <a href="review.html">Review Submission</a>
+        <a href="confirmation.html">Check Status</a>
+      </div>
+      <div class="footer-col">
+        <h4>Information</h4>
+        <a href="eligibility.html">Eligibility</a>
+        <a href="faq.html">FAQ &amp; Help</a>
+        <a href="privacy.html">Privacy Policy</a>
+      </div>
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <a href="tel:18004334636">1-800-433-4636</a>
+        <a href="/cdn-cgi/l/email-protection#a1c9c4cdd1e1d2d5d4c5c4cfd5c0c8c58fc6ced7"><span class="__cf_email__" data-cfemail="432b262f330330373627262d37222a276d242c35">[email&#160;protected]</span></a>
+        <a href="faq.html">Live Chat</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 U.S. Department of Education. All rights reserved.</span>
+      <div class="footer-secure">
+        <span class="secure-badge">🔒 Secure &amp; Encrypted</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<script>
+  /* ── Mobile nav ── */
+  document.getElementById('hamburger').addEventListener('click', function() {
+    const open = document.getElementById('mobileMenu').classList.toggle('open');
+    this.setAttribute('aria-expanded', String(open));
+  });
+
+  /* ══════════════════════════════════════════
+     FULL-WIDTH COUNTDOWN TIMER
+     Deadline: May 8, 2026
+  ══════════════════════════════════════════ */
+  const DEADLINE    = new Date('2026-05-08T23:59:59');
+  const WINDOW_OPEN = new Date('2026-03-08T00:00:00');
+  const TOTAL_MS    = DEADLINE - WINDOW_OPEN;
+
+  function pad2(n) { return String(Math.max(0, n)).padStart(2, '0'); }
+
+  function tick() {
+    const now  = new Date();
+    const diff = DEADLINE - now;
+
+    if (diff <= 0) {
+      // Deadline passed — show expired state
+      ['cd-days','cd-hours','cd-mins','cd-secs'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = '00';
+      });
+      const fill = document.getElementById('cd-fill');
+      if (fill) fill.style.width = '100%';
+      const pct = document.getElementById('cd-pct-label');
+      if (pct) pct.textContent = 'Deadline reached';
+      const banner = document.getElementById('cdBanner');
+      if (banner) banner.classList.add('expired');
+      const expMsg = document.getElementById('expiredMsg');
+      if (expMsg) expMsg.style.display = 'block';
+      return; // stop
+    }
+
+    const totalSec = Math.floor(diff / 1000);
+    const days  = Math.floor(totalSec / 86400);
+    const hours = Math.floor((totalSec % 86400) / 3600);
+    const mins  = Math.floor((totalSec % 3600) / 60);
+    const secs  = totalSec % 60;
+
+    const dEl = document.getElementById('cd-days');
+    const hEl = document.getElementById('cd-hours');
+    const mEl = document.getElementById('cd-mins');
+    const sEl = document.getElementById('cd-secs');
+    if (dEl) dEl.textContent = pad2(days);
+    if (hEl) hEl.textContent = pad2(hours);
+    if (mEl) mEl.textContent = pad2(mins);
+    if (sEl) sEl.textContent = pad2(secs);
+
+    // Urgent pulse when 7 days or fewer remain
+    [dEl, hEl, mEl, sEl].forEach(el => {
+      if (!el) return;
+      if (days < 7) el.classList.add('urgent');
+      else el.classList.remove('urgent');
+    });
+
+    // Progress bar
+    const elapsed = Math.max(0, now - WINDOW_OPEN);
+    const pct = Math.min(100, (elapsed / TOTAL_MS) * 100);
+    const fill = document.getElementById('cd-fill');
+    const pctLabel = document.getElementById('cd-pct-label');
+    if (fill) fill.style.width = pct.toFixed(1) + '%';
+    if (pctLabel) pctLabel.textContent = pct.toFixed(0) + '% elapsed';
+
+    setTimeout(tick, 1000);
+  }
+
+  tick(); // start immediately on page load
+</script>
+</body>
+</html>

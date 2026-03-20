@@ -1,0 +1,284 @@
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const token = sessionStorage.getItem("token");
+    if (!token) {
+      // No token → redirect to login
+      window.location.href = "Auth.html";
+    }
+  });
+</script>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Help &amp; FAQ — Federal Student Aid</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    .faq-layout { display: grid; grid-template-columns: 200px 1fr; gap: 40px; padding: 48px 0 80px; align-items: start; }
+
+    .faq-nav { position: sticky; top: 130px; background: var(--white); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow-sm); }
+    .faq-nav h4 { font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--gray-600); margin-bottom: 12px; }
+    .faq-nav a  { display: block; padding: 8px 10px; font-size: .88rem; color: var(--gray-600); border-radius: 6px; margin-bottom: 2px; font-weight: 600; }
+    .faq-nav a:hover, .faq-nav a.active { background: rgba(0,40,104,.07); color: var(--navy); }
+
+    .faq-search { margin-bottom: 32px; }
+    .faq-search input { font-size: 1rem; padding: 14px 18px; border-radius: var(--radius); border: 2px solid var(--gray-100); width: 100%; background: var(--white); font-family: 'Source Sans 3', sans-serif; }
+    .faq-search input:focus { outline: none; border-color: var(--navy-mid); box-shadow: 0 0 0 3px rgba(0,53,128,.1); }
+
+    .faq-section { margin-bottom: 48px; }
+    .faq-section h2 { font-size: 1.3rem; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid var(--gray-100); }
+
+    .accordion { border: 1.5px solid var(--gray-100); border-radius: var(--radius); overflow: hidden; margin-bottom: 10px; background: var(--white); }
+    .acc-head {
+      width: 100%; text-align: left; background: none; border: none; cursor: pointer;
+      padding: 18px 22px; display: flex; justify-content: space-between; align-items: center;
+      font-family: 'Source Sans 3', sans-serif; font-size: .95rem; font-weight: 700; color: var(--gray-900);
+      transition: background var(--transition);
+    }
+    .acc-head:hover { background: var(--off-white); }
+    .acc-head.open  { background: rgba(0,40,104,.04); color: var(--navy); }
+    .acc-icon { font-size: 1rem; transition: transform .25s ease; flex-shrink: 0; margin-left: 12px; }
+    .acc-head.open .acc-icon { transform: rotate(45deg); }
+    .acc-body { display: none; padding: 0 22px 18px; font-size: .92rem; color: var(--gray-600); line-height: 1.7; }
+    .acc-body.open { display: block; }
+    .acc-body a { color: var(--navy-mid); font-weight: 600; }
+
+    .contact-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 32px; }
+    .contact-tile { background: var(--white); border-radius: var(--radius); padding: 28px; box-shadow: var(--shadow-sm); text-align: center; }
+    .contact-tile .ct-icon { font-size: 2rem; margin-bottom: 12px; display: block; }
+    .contact-tile h3 { font-size: 1rem; margin-bottom: 8px; }
+    .contact-tile p  { font-size: .85rem; color: var(--gray-600); margin-bottom: 14px; }
+
+    @media(max-width:800px){ .faq-layout{ grid-template-columns: 1fr; } .faq-nav{ display: none; } .contact-grid{ grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-seal">🎓</div>
+      <div class="logo-text">Federal Student Aid<span>U.S. Department of Education</span></div>
+    </a>
+    <nav class="nav">
+      <a href="index.html">Home</a><a href="eligibility.html">Eligibility</a>
+      <a href="faq.html" class="active">Help &amp; FAQ</a><a href="privacy.html">Privacy</a>
+      <a href="application.html" class="nav-cta">Apply Now</a>
+    </nav>
+    <button class="hamburger" id="hamburger" aria-label="Open menu"><span></span><span></span><span></span></button>
+  </div>
+  <nav class="mobile-menu" id="mobileMenu">
+    <a href="index.html">Home</a><a href="eligibility.html">Eligibility</a>
+    <a href="faq.html">FAQ</a><a href="privacy.html">Privacy</a><a href="application.html">Apply Now →</a>
+  </nav>
+</header>
+
+<div class="page-hero">
+  <div class="container">
+    <nav class="breadcrumb"><a href="index.html">Home</a><span>›</span>Help &amp; FAQ</nav>
+    <span class="page-hero-label">Support Center</span>
+    <h1>Help &amp; Frequently Asked Questions</h1>
+    <p>Find answers to common questions about eligibility, the application process, and your aid award.</p>
+  </div>
+</div>
+
+<main>
+  <div class="container">
+    <div class="faq-layout">
+      <!-- Sidebar nav -->
+      <aside class="faq-nav">
+        <h4>Categories</h4>
+        <a href="#general" class="active">General</a>
+        <a href="#ssn">SSN &amp; Identity</a>
+        <a href="#application">Application</a>
+        <a href="#aid-types">Aid Types</a>
+        <a href="#technical">Technical</a>
+        <a href="#contact">Contact Us</a>
+      </aside>
+
+      <div>
+        <!-- Search -->
+        <div class="faq-search">
+          <input type="search" id="faqSearch" placeholder="🔍 Search frequently asked questions..." oninput="filterFAQ(this.value)"/>
+        </div>
+
+        <!-- GENERAL -->
+        <div class="faq-section" id="general">
+          <h2>📋 General Questions</h2>
+
+          <div class="accordion">
+            <button class="acc-head" onclick="toggleAcc(this)">What is Federal Student Aid (FSA)? <span class="acc-icon">+</span></button>
+            <div class="acc-body">Federal Student Aid is an office of the U.S. Department of Education. It is the largest provider of student financial aid in the nation, providing more than $120 billion in grants, loans, and work-study funds each year to help millions of students pay for college or career school.</div>
+          </div>
+          <div class="accordion">
+            <button class="acc-head" onclick="toggleAcc(this)">Is it free to apply for federal student aid? <span class="acc-icon">+</span></button>
+            <div class="acc-body">Yes, absolutely. The application (FAFSA) is completely free. Be wary of websites that charge a fee to help you fill out your FAFSA — this is a free government service. Always use the official .gov website.</div>
+          </div>
+          <div class="accordion">
+            <button class="acc-head" onclick="toggleAcc(this)">What are the application deadlines? <span class="acc-icon">+</span></button>
+            <div class="acc-body">Federal deadlines are June 30 each year for that academic year. However, states and schools often have earlier deadlines — sometimes as early as January or February. Apply as early as possible to maximize your aid eligibility. Check your state's <a href="#">deadline page</a> for specifics.</div>
+          </div>
+          <div class="accordion">
+            <button class="acc-head" onclick="toggleAcc(this)">Do I need to reapply every year? <span class="acc-icon">+</span></button>
+            <div class="acc-body">Yes. You must submit a new application each academic year. Your financial situation may change, and aid amounts are recalculated annually. Some information may be pre-filled from the previous year to make reapplication faster.</div>
+          </div>
+        </div>
+
+        <!-- SSN -->
+        <div class="faq-section" id="ssn">
+          <h2>🔐 SSN &amp; Identity</h2>
+
+          <div class="accordion">
+            <button class="acc-head" onclick="toggleAcc(this)">What if I don't have a Social Security Number? <span class="acc-icon">+</span></button>
+            <div class="acc-body">To receive federal student aid, you generally must have a valid Social Security Number (SSN). If you are an eligible non-citizen without an SSN, contact our counselors at 1-800-433-4636. Some state and institutional aid programs may be available to you even without an SSN.</div>
+          </div>
+          <div class="accordion">
+            <button class="acc-head" onclick="toggleAcc(this)">How is my SSN protected? <span class="acc-icon">+</span></button>
+            <div class="acc-body">Your Social Security Number is transmitted using 256-bit SSL encryption and is never stored in plain text in our systems. It is used solely for identity verification with the Social Security Administration and IRS. Our data handling practices comply fully with FERPA and federal privacy laws. Read our full <a href="privacy.html">Privacy Policy</a> for details.</div>
+          </div>
+          <div class="accordion">
+            <button class="acc-head" onclick="toggleAcc(this)">What if my SSN has been lost or stolen? <span class="acc-icon">+</span></button>
+            <div class="acc-body">If you believe your SSN has been compromised, contact the Social Security Administration at 1-800-772-1213. You should also consider placing a fraud alert with the three major credit bureaus (Equifax, Experian, TransUnion) and file a report at IdentityTheft.gov.</div>
+          </div>
+        </div>
+
+        <!-- APPLICATION -->
+        <div class="faq-section" id="application">
+          <h2>📝 Application Process</h2>
+
+          <div class="accordion">
+            <button class="acc-head" onclick="toggleAcc(this)">What is an FSA ID and how do I create one? <span class="acc-icon">+</span></button>
+            <div class="acc-body">An FSA ID is a username and password that serves as your legal digital signature for federal student aid. You create it at <a href="https://studentaid.gov" target="_blank">studentaid.gov</a>. You must use your own personal email address — parents should create a separate FSA ID. It takes 1–3 days for your FSA ID to be verified with the Social Security Administration.</div>
+          </div>
+          <div class="accordion">
+            <button class="acc-head" onclick="toggleAcc(this)">How long does the application take? <span class="acc-icon">+</span></button>
+            <div class="acc-body">Most students complete the application in 30–45 minutes. If you have your financial documents and SSN ready beforehand, it can take as little as 20 minutes. The IRS Data Retrieval Tool can automatically import your tax information to save time.</div>
+          </div>
+          <div class="accordion">
+            <button class="acc-head" onclick="toggleAcc(this)">Can I save my application and finish it later? <span class="acc-icon">+</span></button>
+            <div class="acc-body">Yes. Your progress is saved in your browser session. However, for security purposes, the session will expire after 45 minutes of inactivity. We recommend completing the application in one sitting, but you can return and restart at any time — it only takes about 30 minutes.</div>
+          </div>
+          <div class="accordion">
+            <button class="acc-head" onclick="toggleAcc(this)">What happens after I submit my application? <span class="acc-icon">+</span></button>
+            <div class="acc-body">After submission, you will receive a confirmation email. Within 3–5 business days, you'll receive a Student Aid Report (SAR) summarizing your application. Your school's financial aid office will then use this information to create an aid offer for you, typically within 2–4 weeks of your SAR being processed.</div>
+          </div>
+        </div>
+
+        <!-- AID TYPES -->
+        <div class="faq-section" id="aid-types">
+          <h2>💰 Aid Types</h2>
+
+          <div class="accordion">
+            <button class="acc-head" onclick="toggleAcc(this)">What is the Pell Grant and do I need to repay it? <span class="acc-icon">+</span></button>
+            <div class="acc-body">The Federal Pell Grant is a need-based grant for undergraduate students. Unlike loans, grants do NOT need to be repaid. The maximum award for 2024–2025 is $7,395 per year. The amount you receive depends on your financial need, enrollment status, and the cost of your school.</div>
+          </div>
+          <div class="accordion">
+            <button class="acc-head" onclick="toggleAcc(this)">What is the difference between subsidized and unsubsidized loans? <span class="acc-icon">+</span></button>
+            <div class="acc-body"><strong>Subsidized Loans:</strong> Based on financial need. The government pays the interest while you're in school at least half-time. <strong>Unsubsidized Loans:</strong> Not based on need. Interest accrues during all periods, including while you're in school. Both have low fixed interest rates (5.50% for 2024–25 undergraduates) compared to private loans.</div>
+          </div>
+        </div>
+
+        <!-- TECHNICAL -->
+        <div class="faq-section" id="technical">
+          <h2>🖥️ Technical Issues</h2>
+
+          <div class="accordion">
+            <button class="acc-head" onclick="toggleAcc(this)">The form is not saving my information. What should I do? <span class="acc-icon">+</span></button>
+            <div class="acc-body">Try the following: (1) Ensure JavaScript is enabled in your browser. (2) Clear your browser's cache and cookies. (3) Try a different browser (Chrome, Firefox, or Edge work best). (4) Disable any browser extensions that might block scripts. If the problem persists, call 1-800-433-4636.</div>
+          </div>
+          <div class="accordion">
+            <button class="acc-head" onclick="toggleAcc(this)">What browsers are supported? <span class="acc-icon">+</span></button>
+            <div class="acc-body">This application is fully supported on the latest versions of Google Chrome, Mozilla Firefox, Microsoft Edge, and Safari. For the best experience, ensure your browser is up to date. Internet Explorer is not supported.</div>
+          </div>
+          <div class="accordion">
+            <button class="acc-head" onclick="toggleAcc(this)">I received an error message. What does it mean? <span class="acc-icon">+</span></button>
+            <div class="acc-body">Red error messages appear when required fields are missing or contain invalid data. Green messages confirm successful steps. If you receive a system error (not a validation error), please note the error code and contact our technical support at 1-800-433-4636, or try reloading the page and submitting again.</div>
+          </div>
+        </div>
+
+        <!-- CONTACT -->
+        <div id="contact" style="margin-bottom:48px;">
+          <h2 style="font-size:1.3rem; margin-bottom:8px;">📞 Still Need Help?</h2>
+          <p style="color:var(--gray-600); margin-bottom:0;">Our team is available Monday through Friday, 8 AM to 8 PM Eastern Time.</p>
+          <div class="contact-grid">
+            <div class="contact-tile">
+              <span class="ct-icon">📞</span>
+              <h3>Call Us</h3>
+              <p>Speak with a counselor directly.</p>
+              <a href="tel:18004334636" class="btn btn-primary btn-sm">1-800-433-4636</a>
+            </div>
+            <div class="contact-tile">
+              <span class="ct-icon">✉️</span>
+              <h3>Email Us</h3>
+              <p>Response within 1–2 business days.</p>
+              <a href="/cdn-cgi/l/email-protection#69010c0519291a1d1c0d0c071d08000d470e061f" class="btn btn-outline btn-sm">Send Email</a>
+            </div>
+            <div class="contact-tile">
+              <span class="ct-icon">💬</span>
+              <h3>Live Chat</h3>
+              <p>Chat with an agent in real time.</p>
+              <button class="btn btn-outline btn-sm" onclick="alert('Live chat coming soon.')">Start Chat</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /content -->
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <a href="index.html" class="logo" style="color:var(--white);">
+          <div class="logo-seal">🎓</div>
+          <div class="logo-text">Federal Student Aid<span>U.S. Department of Education</span></div>
+        </a>
+        <p style="margin-top:14px;">Helping students access the financial resources they need.</p>
+      </div>
+      <div class="footer-col"><h4>Applications</h4><a href="application.html">Start Application</a><a href="review.html">Review Submission</a></div>
+      <div class="footer-col"><h4>Information</h4><a href="eligibility.html">Eligibility</a><a href="faq.html">FAQ</a><a href="privacy.html">Privacy Policy</a></div>
+      <div class="footer-col"><h4>Contact</h4><a href="tel:18004334636">1-800-433-4636</a><a href="/cdn-cgi/l/email-protection#0e666b627e4e7d7a7b6a6b607a6f676a20696178">Email Us</a></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2024 U.S. Department of Education. All rights reserved.</span>
+      <span class="secure-badge">🔒 Secure &amp; Encrypted</span>
+    </div>
+  </div>
+</footer>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+  document.getElementById('hamburger').addEventListener('click', () => {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  });
+
+  function toggleAcc(btn) {
+    const body = btn.nextElementSibling;
+    const isOpen = btn.classList.contains('open');
+    // close all
+    document.querySelectorAll('.acc-head.open').forEach(b => {
+      b.classList.remove('open');
+      b.nextElementSibling.classList.remove('open');
+    });
+    if (!isOpen) {
+      btn.classList.add('open');
+      body.classList.add('open');
+    }
+  }
+
+  function filterFAQ(query) {
+    const q = query.toLowerCase();
+    document.querySelectorAll('.accordion').forEach(acc => {
+      const text = acc.textContent.toLowerCase();
+      acc.style.display = text.includes(q) ? '' : 'none';
+    });
+  }
+
+  // Highlight nav on scroll
+  const sections = document.querySelectorAll('.faq-section, #contact');
+  window.addEventListener('scroll', () => {
+    let curr = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 200) cur

